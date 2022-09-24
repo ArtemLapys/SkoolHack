@@ -1,0 +1,107 @@
+.timeline-scroller {
+	position: relative;
+	height: 240px;
+	overflow: scroll;
+	background-color: var(--metalayer);
+}
+
+div {
+	display: block;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	color: var(--text);
+	font-family: system-ui;
+}
+
+:root {
+	--metalayer: hsla(0, 0%, 100%, 0.05);
+    --layer: #2e2e2e;
+	--separator: rgba(255, 255, 255, 0.1);
+	--text: #fff;
+	--text-em: #0084ff;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-corner {
+	background: none;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--text-em);
+	border-radius: 5px;
+	border: 3px solid transparent;
+	background-clip: padding-box;
+}
+
+::-webkit-scrollbar-track {
+	background: none;
+}
+
+.timeline {
+	flex: auto;
+	padding-left: 5px;
+}
+
+.time-markers {
+	position: relative;
+	border-bottom: 1px solid var(--separator);
+	height: 20px;
+	width: 100%;
+}
+
+.marker {
+	position: absolute;
+	transform: translateX(-50%);
+	font-size: 10px;
+	bottom: 0;
+	padding-bottom: 5px;
+}
+
+.marker::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	border-left: 1px solid var(--separator);
+	margin-left: -0.5px;
+	height: 5px;
+	bottom: 0;
+}
+
+.major::after {
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+.playhead {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 1px;
+	margin-left: 5px;
+	background-color: var(--text-em);
+	z-index: 20;
+	pointer-events: none;
+}
+
+.playhead::before {
+	content: "";
+	display: block;
+	border-top: 10px solid var(--text-em);
+	border-left: 10px solid transparent;
+	border-right: 10px solid transparent;
+	margin-left: -9.5px;
+}
+
+.layer {
+	min-height: 30px;
+	position: relative;
+	padding: 5px 0;
+}

@@ -1,0 +1,21 @@
+﻿.modal-content{
+	color: aliceblue;
+	background-color: #22262c;
+}
+
+.btn-light-close{
+	color: aliceblue;
+	background-color: aliceblue;
+}
+
+.modal-header {
+	border-bottom: var(--bs-modal-header-border-width) solid  hsla(0, 0%, 100%, .05);
+}
+
+.modal-footer{
+	border-top: var(--bs-modal-header-border-width) solid hsla(0, 0%, 100%, .05);
+}
+
+.modal-body p{
+	margin:0;
+}

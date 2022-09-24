@@ -1,0 +1,20 @@
+﻿.header-text .nav-item-text a{
+	color:aliceblue;
+	transition: all 0.2s ease-in-out;
+}
+.header-text .nav-item-text a:hover {
+	background: 0 0;
+	border: 0;
+	border-radius: var(--bs-nav-pills-border-radius);
+	background-color: hsla(0, 0%, 100%, .05);
+
+}
+
+hr {
+	margin: 1rem 0;
+	color: currentColor;
+	background-color: currentColor;
+	border: 0;
+	opacity: 0.25;
+}
+

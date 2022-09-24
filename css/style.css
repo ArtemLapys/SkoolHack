@@ -1,0 +1,53 @@
+﻿@import url("header.css");
+@import url("files.css");
+@import url("modal.css");
+
+
+::-webkit-scrollbar {
+	width: 10px;
+
+	
+}
+
+
+::-webkit-scrollbar-thumb {
+	/* background-color: hsla(0, 0%, 100%, .3); */
+	
+}
+
+html, body{
+	width: 100%;
+}
+
+
+body{
+	overflow-y: scroll;
+	-webkit-touch-callout: none;
+	/* iOS Safari */
+	-webkit-user-select: none;
+	/* Chrome/Safari/Opera */
+	-khtml-user-select: none;
+	/* Konqueror */
+	-moz-user-select: none;
+	/* Firefox */
+	-ms-user-select: none;
+	/* Internet Explorer/Edge */
+	user-select: none;
+	color: aliceblue;
+	background-color: #22262c;
+	font-family: 'Montserrat', sans-serif;
+	transition: all 0.2s ease-in-out;
+	/* -webkit-transition: -webkit-transform 1s ease-in;
+	/* Changed here */
+	/* -moz-transition: -moz-transform 1s ease-in;
+	-o-transition: -o-transform 1s ease-in;
+	transition: transform 1s ease-in; */
+} */
+
+i{
+	align-items: center;
+	display:inline-block;
+	justify-content:center;
+	
+}
+

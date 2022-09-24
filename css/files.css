@@ -1,0 +1,89 @@
+﻿.main{
+	flex:auto;
+	display: flex;
+}
+.files-users{
+	max-height: 460px;
+	overflow-y: overlay;
+	
+}
+.main-files{
+	/* min-width: 100px; */
+	/* max-width: 313px; */
+	width: 313px;
+	/* min-width: 50%; */
+	display: flex;
+	flex-direction: column;	
+	flex:none;
+	margin-right: 15px;
+}
+.input-for-file-add{
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+
+.main-video{
+	/* background-color: #1d1d1d; */
+	flex: auto;
+	/* height: 0; */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease-in-out;
+}
+
+#playback{
+	min-width: 50%;
+	max-width: 100%;
+	max-height: 100%;
+	background-color: #000;
+	transition: all 0.2s ease-in-out;
+
+}
+
+.files{
+	flex: auto;
+	height: 0;
+	overflow: auto;
+	overflow: overlay;
+}
+
+.files-background{
+	background-color: hsla(0, 0%, 100%, .05);
+	border-radius: var(--bs-nav-pills-border-radius);
+}
+
+.files-background-add{
+	background-color: hsla(0, 0%, 100%, .1);
+	border-radius: var(--bs-nav-pills-border-radius);
+
+	display: inline-block;
+		width: 128px;
+		height: 72px;
+		cursor: pointer;
+		vertical-align: top;
+		margin: 5px;
+		overflow: hidden;
+		transition: all 0.2s ease-in-out;
+		word-break: break-word;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: contain;
+	}
+	
+.files-background-add:hover {
+	background-color: hsla(0, 0%, 100%, .3);
+}
+
+.files-add{
+	display:inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+  
