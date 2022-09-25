@@ -2,12 +2,12 @@
 	color:aliceblue;
 	transition: all 0.2s ease-in-out;
 }
+
 .header-text .nav-item-text a:hover {
 	background: 0 0;
 	border: 0;
 	border-radius: var(--bs-nav-pills-border-radius);
 	background-color: hsla(0, 0%, 100%, .05);
-
 }
 
 hr {
@@ -17,7 +17,6 @@ hr {
 	border: 0;
 	opacity: 0.25;
 }
-
 
 .nav-main-drop {
 	color: aliceblue;
@@ -44,5 +43,3 @@ hr {
 	background-color: rgba(0, 0, 0, 0.2);
 	backdrop-filter: blur(50px);
 }
-
-

@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head lang="ru">
 	<script src="coi-serviceworker.min.js"></script>
 	<script src="js/libs/ffmpeg/ffmpeg.dev.js"></script>
@@ -10,11 +11,11 @@
 	<title>viGU - Видеоредактор</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-	<!-- <link rel="preload" href="/css/style.css" as="style"> -->
+	<!-- <link rel="preload" href="/css/style.css" as="style"> -->	
 	<link rel="preload" href="css/preload.css" as="style">
 	<link rel="preload" href="js/preload.js" as="script">
-	<link rel="stylesheet" href="/css/style.css">
-	<link rel="stylesheet" href="/css/timeline.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/timeline.css">
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&amp;display=swap" rel="stylesheet">
@@ -30,95 +31,74 @@
 			
 		</div>
 	</div>
+
 	<div class="container">
-		
-			<header class=" py-3 row">
+		<header class=" py-3 row">
 
-				<nav class="col-sm navbar navbar-expand-md sticky-top">
+			<nav class="col-sm navbar navbar-expand-md sticky-top">
+				<ul class="nav nav-pills mx-2 header-text justify-content-left">
+
+					<li class="nav-item-text"><a href="#" class="nav-link active" aria-current="page">Редактор</a></li>	
+					<li class="nav-item-text">
+
+						<div class="btn-group">
+
+							<button type="button" class="  nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false" id="contextMenuFile"> <!--dropdown-toggle-->
+								Файл
+							</button>
+
+							<ul class="dropdown-menu ">
+								<input id="selectFile-in-menu" for="file-add" type="file" style="display: none">
+								<li><a class="dropdown-item" href="#" >Открыть файл</a></li>
+								<li><a class="dropdown-item export" href="#">Экспортировать</a></li>
+								<li><hr class="m-2 border-1 border-top"></li>
+								<li><a class="dropdown-item" href="#">Справка</a></li>
+							</ul>
+
+						</div>
+
+					</li>
+
+					<li class="nav-item-text">
+						<div class="btn-group">
+
+							<button type="button" class="  nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false"> <!--dropdown-toggle-->
+								Инструменты
+							</button>
+
+							<ul class="dropdown-menu">	
+								<li><a id="split-item" class="dropdown-item" href="#">Разрезать</a></li>				
+								<li><a id="dublicate-item" class="dropdown-item" href="#">Дублировать</a></li>		
+								<li><a id="remove-item" class="dropdown-item" href="#">Удалить</a></li>
+							</ul>
+
+						</div>
+					</li>
+
+					<li class="nav-item-text"><a href="#" class="nav-link export">Экспортировать</a></li>
+
+				</ul>
+			</nav>
 				
-					<ul class="nav nav-pills mx-2 header-text justify-content-left">
-						<li class="nav-item-text"><a href="#" class="nav-link active" aria-current="page">Редактор</a></li>
-						
-						<li class="nav-item-text">
-							<div class="btn-group">
-								<button type="button" class="  nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false" id="contextMenuFile"> <!--dropdown-toggle-->
-									Файл
-								</button>
-								<ul class="dropdown-menu ">
-									<input id="selectFile-in-menu" for="file-add" type="file" style="display: none">
-									<li><a class="dropdown-item" href="#" >Открыть файл</a></li>
-									<li><a class="dropdown-item" href="#">Новый проект</a></li>
-									<li><a class="dropdown-item export" href="#">Экспортировать</a></li>
-									<li>
-										<hr class="m-2 border-1 border-top">
-									</li>
-									<li><a class="dropdown-item" href="#">Настройки</a></li>
-									<li><a class="dropdown-item" href="#">Справка</a></li>
-								</ul>
-							</div>
-						</li>
+			<div class="col-sm d-flex flex-row-reverse mx-2 navbar navbar-expand-md sticky-top ">
+				<p class="badge bg-danger mx-1">DYNASTY</p>
+				<p class="my-auto">RED</p>
+			</div>
 
-						<li class="nav-item-text">
-							<div class="btn-group">
-								<button type="button" class=" nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false"> <!--dropdown-toggle-->
-									Правка
-								</button>
-								<ul class="dropdown-menu">
+		</header>
 
-									<!--Хватит редактировать эту хрень-->
-									<!--Тут все нормально-->
-									<li><a class="dropdown-item" href="#">Копировать</a></li>
-									<li><a class="dropdown-item" href="#">Вставить</a></li>
-									<li><a class="dropdown-item" href="#">Вырезать</a></li>
-									<li>
-										<hr class="dropdown-divider">
-									</li>
-									<li><a class="dropdown-item" href="#">Отменить</a></li>
-									<li><a class="dropdown-item" href="#">Вернуть</a></li>
-								</ul>
-							</div>
-						</li>
-
-						<li class="nav-item-text">
-							<div class="btn-group">
-								<button type="button" class="  nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false"> <!--dropdown-toggle-->
-									Инструменты
-								</button>
-								<ul class="dropdown-menu">
-									<li><a id="edit-item" class="dropdown-item" href="#">Редактировать</a></li>			
-									<li><a id="split-item" class="dropdown-item" href="#">Разрезать</a></li>				
-									<li><a id="dublicate-item" class="dropdown-item" href="#">Дублировать</a></li>		
-									<li><a id="remove-item" class="dropdown-item" href="#">Удалить</a></li>				
-									<li><a id="add-text-item" class="dropdown-item" href="#">Добавить текст</a></li>
-								</ul>
-							</div>
-						</li>
-
-						<li class="nav-item-text"><a href="#" class="nav-link export">Экспортировать</a></li>
-
-					</ul>
-				</nav>
-				
-					<div class="col-sm d-flex flex-row-reverse mx-2 navbar navbar-expand-md sticky-top ">
-						<p class="badge bg-danger mx-1">DYNASTY</p>
-						<p class="my-auto">RED</p>
-					</div>
-				<!-- <ul class="nav ">
-					<li class="nav-item-text">RED DYNASTY</li>
-				</ul> -->
-			</header>
-
-			<hr class="m-0 border-1 border-top">
+		<hr class="m-0 border-1 border-top">
 			<div class="container mt-4">	
 
 				<div class="main justify-content-md-center ">
-
 					<div class="main-files files-background rounded" id="loadFiles">
+
 						<div class="m-3">
 							<p class="mx-2 mt-2">Файлы проекта</p>
 								<input id="selectFile" type="file" style="display: none" />
 								<div id="files-users-click" class="files-users"></div>
 						</div>
+
 					</div>
 
 					<div class="main-video rounded ">
@@ -130,23 +110,6 @@
 				<div class="main justify-content-md-center files-background	mt-2 pt-2 px-2 rounded">
 					<div class="toolbar-main">
 						<div class="tollbar" id="tollbar ">
-
-							<!--Rollback chandes-->
-							<button class="toolbar-button rounded" title="Отменить">
-								<i id="undo" class="material-symbols-outlined">undo</i>
-							</button>
-
-							<!--Rollback the rollback chandes-->
-							<button class="toolbar-button rounded" title="Вернуть">
-								<i id="redo" class="material-symbols-outlined">redo</i>
-							</button>
-
-							<i class="material-symbols-outlined">more_vert</i>	<!--delimiter-->
-
-							<!--Open episode properties editor-->
-							<button class="toolbar-button rounded" title="Редактировать эпизод">
-								<i id="edit" class="material-symbols-outlined">build</i>
-							</button>
 
 							<!--Slipt episode into two parts in place of playhead-->
 							<button class="toolbar-button rounded" title="Разрезать эпизод">
@@ -163,35 +126,34 @@
 								<i id="remove" class="material-symbols-outlined">delete</i>
 							</button>
 
-							<!--Add text label-->
-							<button class="toolbar-button rounded" title="Добавить текст">
-								<i id="add-text" class="material-symbols-outlined">text_fields</i>
-							</button>
-
 							<i class="material-symbols-outlined">more_vert</i>	<!--delimiter-->
 
+							<!--Set marker on start position-->
 							<button class="toolbar-button rounded" title="Вернуться в начало">
 								<i id="start" class="material-symbols-outlined">arrow_circle_left</i>
 							</button>
 
+							<!--Play(Pause)-->
 							<button class="toolbar-button rounded" title="Проигрывать">
 								<i id="play" class="material-symbols-outlined">play_circle</i>	<!--pause_circle-->
 							</button>
 
+							<!--Stop-->
 							<button class="toolbar-button rounded" title="Остановить">
 								<i id="stop" class="material-symbols-outlined">stop_circle</i>
 							</button>
 
 							<i class="material-symbols-outlined">more_vert</i>	<!--delimiter-->
 							
+							<!--Zoom in timeline-->
 							<button class="toolbar-button rounded" title="Приблизить">
 								<i id="zoom-in" class="material-symbols-outlined">zoom_in</i>
 							</button>
 							
+							<!--Zoom out timeline-->
 							<button class="toolbar-button rounded" title="Отдалить">
 								<i id="zoom-out" class="material-symbols-outlined">zoom_out</i>
 							</button>
-
 
 						</div>
 					</div>
@@ -203,159 +165,97 @@
 				<div class="time-markers" id="axis"></div>
 				<div class="layers " id="layers"></div>
 				<div class="playhead " id="playhead" style="left: 0px"></div>
-				</div>
 			</div>
 
 		</div>
 
+	</div>
 
-		<!-- Ошибка при экспорте -->
-		<div class="modal show" id="modal-error-export" tabindex="-1" aria-modal="false">
-			<div class="modal-dialog modal-dialog-centered ">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Ошибка экспорта</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-							aria-label="Закрыть"></button>
-					</div>
-					<div class="modal-body">
-						<p>Произошла неизвестная ошибка при экспорте.</p>
-						<p>[ошибка из логовов]</p>
-					</div>
-					<div class="modal-footer  row">
-						<button type="button" class="col-sm mx-2 btn btn-primary" data-bs-dismiss="modal">Окей</button>
-						<!-- <button type="button" class="col-sm mx-2 btn btn-primary" id="btn-in-modal-new-project">Создать</button> -->
-					</div>
+	<!-- Экспорт проекта -->
+	<div class="modal show" id="modal-error-export" tabindex="-1" aria-modal="false">
+		<div class="modal-dialog modal-dialog-centered ">
+
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">Ошибка экспорта</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
 				</div>
-			</div>
-		</div>
-
-
-		<!-- Модальное окно для нового проекта -->
-		<div class="modal show" id="modal-new-project" tabindex="-1" aria-modal="false">
-			<div class="modal-dialog modal-dialog-centered " >
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Создание нового проекта</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-					</div>
-					<div class="modal-body">
-						<p>Текущие файлы и дорожки в рабочей области будут удалены.</p>
-						<p>Вы действительно хотите создать новый проект?</p>
-					</div> 
-					<div class="modal-footer  row">
-						<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-						<button type="button" class="col-sm mx-2 btn btn-primary" id="btn-in-modal-new-project">Создать</button>
-					</div>
+	
+				<div class="modal-body">
+					<p>Произошла неизвестная ошибка при экспорте.</p>
+					<p>[ошибка из логовов]</p>
 				</div>
-			</div>
-		</div>
-
-
-		<!--File deleting panel-->
-		<div class="modal show" id="modal-delete-file" tabindex="-1" aria-modal="false" ><!--aria-hidden="false"? -->
-			<div class="modal-dialog modal-dialog-centered " >
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Удаление файла</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-					</div>
-					<div class="modal-body">
-						<p>Вы действительно хотите удалить файл <b><span id="modal-body-span" class="text-break"></span></b> ?</p>
-					</div> 
-					<div class="modal-footer  row">
-						<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-						<button type="button" class="col-sm mx-2 btn btn-danger" id="delete-file">Удалить</button>
-					</div>
+	
+				<div class="modal-footer  row">
+					<button type="button" class="col-sm mx-2 btn btn-primary" data-bs-dismiss="modal">Окей</button>
 				</div>
+	
 			</div>
+
 		</div>
+	</div>
 
+	<!-- Модальное окно для нового проекта -->
+	<div class="modal show" id="modal-new-project" tabindex="-1" aria-modal="false">
+		<div class="modal-dialog modal-dialog-centered " >
 
-		<!--Модальное окно настройки-->
-		<div class="modal show" id="modal-settings" tabindex="-1" aria-modal="true">
-			<div class="modal-dialog modal-dialog-centered ">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Настройки</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-							aria-label="Закрыть"></button>
-					</div>
-					<div class="modal-body">
-						<p><span>Название проекта: </span><input type="text" class="m-2 form-control" placeholder="Имя проекта" aria-label="name-project" aria-describedby="basic-addon1">
-						</p>
-						<p><span>Разрешение видео: </span>
-						</p>
-						<p><span>Кодек видео: </span>
-						</p>
-						<p><span>Рендер видео: </span>
-						
-						<div class="btn-group">
-							<button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-								Action
-							</button>
-							<ul class="dropdown-menu">
-								<li><a class="dropdown-item" href="#">Action</a></li>
-								<li><a class="dropdown-item" href="#">Another action</a></li>
-								<li><a class="dropdown-item" href="#">Something else here</a></li>
-								<li>
-									<hr class="dropdown-divider">
-								</li>
-								<li><a class="dropdown-item" href="#">Separated link</a></li>
-							</ul>
-						</div>
-						
-						
-						
-						</p> 
-					</div>
-					<div class="modal-footer  row">
-						<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-						<button type="button" class="col-sm mx-2 btn btn-primary" id="btn-save-settings">Соханить</button>
-					</div>
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">Создание нового проекта</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
 				</div>
-			</div>
-		</div>
 
-		<!--Episode editing panel-->
-		<div class="modal show" id="modal-edit-episode" tabindex="-1" aria-modal="false" >
-			<div class="modal-dialog modal-dialog-centered " >
-				<div class="modal-content">
+				<div class="modal-body">
+					<p>Текущие файлы и дорожки в рабочей области будут удалены.</p>
+					<p>Вы действительно хотите создать новый проект?</p>
+				</div> 
 
-					<div class="modal-header">
-						<h5 class="modal-title">Редактирование эпизода</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-					</div>
-
-					<div class="modal-body">
-						PositionX
-						PositionY
-						ScaleX
-						ScaleY
-						Rotation
-					</div> 
-
-					<div class="modal-footer  row">
-						<button type="button" class="col-sm mx-2 btn btn-secondary" id="accept-editing-episode">Принять</button>
-						<button type="button" class="col-sm mx-2 btn btn-danger" data-bs-dismiss="modal">Отменить</button>
-					</div>
-
+				<div class="modal-footer  row">
+					<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+					<button type="button" class="col-sm mx-2 btn btn-primary" id="btn-in-modal-new-project">Создать</button>
 				</div>
-			</div>
-		</div>
 
-		
-<script src="js/preload.js"></script>
-		<!-- id="modal-body-span" Вы действительно хотите удалить файл <b>[название файла]</b>? -->
+			</div>
+
+		</div>
+	</div>
+
+	<!--File deleting panel-->
+	<div class="modal show" id="modal-delete-file" tabindex="-1" aria-modal="false" ><!--aria-hidden="false"? -->
+		<div class="modal-dialog modal-dialog-centered " >
+
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">Удаление файла</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+				</div>
+
+				<div class="modal-body">
+					<p>Вы действительно хотите удалить файл <b><span id="modal-body-span" class="text-break"></span></b> ?</p>
+				</div> 
+
+				<div class="modal-footer  row">
+					<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+					<button type="button" class="col-sm mx-2 btn btn-danger" id="delete-file">Удалить</button>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+
+	<script src="js/preload.js"></script>
+
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
 		integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
 		crossorigin="anonymous"></script>
+
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
 		integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz"
 		crossorigin="anonymous"></script>
-
-	
-
 
 	<script src="js/libs/dom.js"></script>
 	<script src="js/libs/easing-editor.js"></script>
@@ -369,9 +269,9 @@
 	<script src="js/layers.js"></script>
 	<script src="js/timeline.js"></script>
 	<script src="js/toolbar.js"></script>
+	<script src="js/menubar.js"></script>
 	<script src="js/export.js"></script>
 	<script src="js/main.js"></script>
 
-	
 </body>
 </html>

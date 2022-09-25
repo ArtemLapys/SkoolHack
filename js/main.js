@@ -89,10 +89,10 @@ document.addEventListener('keydown', e => {
   } else if (e.key === "Delete") {
 		if (Track.selected) Track.selected.remove("delete");
 
-	} else if (e.key === "c" || e.key === "C")  {
+	} else if (e.key === "c" || e.key === "C" || e.key === "с" || e.key === "С")  {
 		if (Track.selected) Track.selected.splitAt(previewTime - Track.selected.start);
 
-  } else if (e.key == "v" || e.key == "V"){
+  } else if (e.key == "v" || e.key == "V" || e.key === "м" || e.key === "М"){
       Track.selected.unselected()
 
 	} else {

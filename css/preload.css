@@ -10,7 +10,6 @@
 	transition: 1s all;
 	opacity: 1;
 	visibility: visible;
-		
 }
 
 .done{
@@ -25,7 +24,6 @@
 	top:50%;
 	transform: translate(-50%,-50%);
 	animation: 2s spin infinite linear;
-	/* animation: 3s linear 1s slidein; */
 }
 
 @keyframes spin{

@@ -2,21 +2,20 @@
 	flex:auto;
 	display: flex;
 }
+
 .files-users{
 	max-height: 460px;
 	overflow-y: overlay;
-	
 }
+
 .main-files{
-	/* min-width: 100px; */
-	/* max-width: 313px; */
 	width: 313px;
-	/* min-width: 50%; */
 	display: flex;
 	flex-direction: column;	
 	flex:none;
 	margin-right: 15px;
 }
+
 .input-for-file-add{
 	width: 0.1px;
 	height: 0.1px;
@@ -26,11 +25,8 @@
 	z-index: -1;
 }
 
-
 .main-video{
-	/* background-color: #1d1d1d; */
 	flex: auto;
-	/* height: 0; */
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -44,7 +40,6 @@
 	border-radius: 5px;
 	background-color: #000;
 	transition: all 2s ease-in-out;
-
 }
 
 .files{
@@ -62,41 +57,6 @@
 .files-background-add{
 	background-color: hsla(0, 0%, 100%, .1);
 	border-radius: var(--bs-nav-pills-border-radius);
-
-	display: inline-block;
-		width: 128px;
-		height: 72px;
-		cursor: pointer;
-		vertical-align: top;
-		margin: 5px;
-		overflow: hidden;
-		transition: all 0.2s ease-in-out;
-		word-break: break-word;
-		background-position: center;
-		background-repeat: no-repeat;
-		background-size: contain;
-	}
-	
-.files-background-add:hover {
-	background-color: hsla(0, 0%, 100%, .3);
-}
-
-.files-add{
-	display:inline-flex;
-	align-items: center;
-	justify-content: center;
-}
-
-
-/* .video-file{
-	/* display: inline-flex;
-	align-items: center;
-	justify-content: center;
-
-
-	background-color: hsla(0, 0%, 100%, .1);
-	border-radius: var(--bs-nav-pills-border-radius);
-
 	display: inline-block;
 	width: 128px;
 	height: 72px;
@@ -108,24 +68,25 @@
 	word-break: break-word;
 	background-position: center;
 	background-repeat: no-repeat;
-	background-size: contain; 
+	background-size: contain;
+}
+	
+.files-background-add:hover {
+	background-color: hsla(0, 0%, 100%, .3);
 }
 
-
- .video-file:hover{
-	background-color: hsla(0, 0%, 100%, .3);
-} */
-
+.files-add{
+	display:inline-flex;
+	align-items: center;
+	justify-content: center;
+}
 
 .video .video-file .files-background-add{
 	opacity:60%;
 	backdrop-filter: blur(50px);
-
-
 }
 
 .name-file{
 	padding: 5px 10px;
 	text-shadow: 0 1px 3px rgb(0 0 0 / 100%);
 }
-
