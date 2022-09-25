@@ -113,6 +113,45 @@ class Source {
   
   }
   
+  const HEIGHT = 100;
+const CHUNK_SIZE = 1024;
+class AudioSource extends Source {
+
+  constructor(...args) {
+    super(...args);
+    this.elem.classList.add('audio');
+    fetch(this.url)
+      .then(r => r.arrayBuffer())
+      .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+      .then(audioBuffer => {
+        this.length = audioBuffer.duration;
+        const samples = audioBuffer.getChannelData(0);
+        let chunk = samples.length / CHUNK_SIZE > 1000 ? Math.floor(samples.length / 1000) : CHUNK_SIZE;
+        thumbnailCanvas.width = Math.ceil(samples.length / chunk);
+        thumbnailCanvas.height = HEIGHT;
+        thumbnailContext.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        // calculates an RMS, according to Wikipedia
+        // why RMS? idk, that's what Scratch did though
+        // I don't even know what an RMS is
+        for (let i = 0; i * chunk < samples.length; i++) {
+          let sum = 0, n;
+          for (n = 0; n < chunk && i * chunk + n < samples.length; n++) {
+            sum += samples[i * chunk + n] * samples[i * chunk + n];
+          }
+          const rms = Math.sqrt(sum / n);
+          thumbnailContext.fillRect(i, (1 - rms) * HEIGHT, 1, rms * HEIGHT);
+        }
+        this.thumbnail = thumbnailCanvas.toDataURL();
+        this.amReady();
+      });
+  }
+
+  createTrack() {
+    return new AudioTrack(this);
+  }
+
+}
+  
   function toSource(mime) {
     const [type] = mime.split('/');
     switch (type) {

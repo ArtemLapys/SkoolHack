@@ -11,19 +11,18 @@
 	<title>viGU - Видеоредактор</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-<<<<<<< HEAD
+
 	<!-- <link rel="preload" href="/css/style.css" as="style"> -->	
 	<link rel="preload" href="css/preload.css" as="style">
 	<link rel="preload" href="js/preload.js" as="script">
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/timeline.css">
-=======
-	<!-- <link rel="preload" href="/css/style.css" as="style"> -->
-	<link rel="preload" href="/SkoolHack/css/preload.css" as="style">
+
+	<!-- <link rel="preload" href="/SkoolHack/css/preload.css" as="style">
 	<link rel="preload" href="/SkoolHack/js/preload.js" as="script">
 	<link rel="stylesheet" href="/SkoolHack/css/style.css">
-	<link rel="stylesheet" href="/SkoolHack/css/timeline.css">
->>>>>>> dae142b63c4c5e30225c68d41a4d647841f0fa3d
+	<link rel="stylesheet" href="/SkoolHack/css/timeline.css"> -->
+
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&amp;display=swap" rel="stylesheet">
@@ -60,7 +59,7 @@
 								<li><a class="dropdown-item" href="#" >Открыть файл</a></li>
 								<li><a class="dropdown-item export" href="#">Экспортировать</a></li>
 								<li><hr class="m-2 border-1 border-top"></li>
-								<li><a class="dropdown-item" href="#">Справка</a></li>
+								<li><a id="reference-in-menu" class="dropdown-item" href="#">Справка</a></li>
 							</ul>
 
 						</div>
@@ -75,7 +74,7 @@
 							</button>
 
 							<ul class="dropdown-menu">	
-								<li><a id="split-item" class="dropdown-item" href="#">Разрезать</a></li>				
+								<li><a id="split-item" class="dropdown-item" href="#">Разделить</a></li>				
 								<li><a id="dublicate-item" class="dropdown-item" href="#">Дублировать</a></li>		
 								<li><a id="remove-item" class="dropdown-item" href="#">Удалить</a></li>
 							</ul>
@@ -180,32 +179,30 @@
 	</div>
 
 	<!-- Экспорт проекта -->
-	<div class="modal show" id="modal-error-export" tabindex="-1" aria-modal="false">
+	<div class="modal" id="modal-export-video" tabindex="-1" aria-modal="false" data-bs-backdrop="static">
 		<div class="modal-dialog modal-dialog-centered ">
 
 			<div class="modal-content">
 
 				<div class="modal-header">
-					<h5 class="modal-title">Ошибка экспорта</h5>
-					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+					<h5 class="modal-title">Экспортирование видео</h5>
 				</div>
 	
 				<div class="modal-body">
-					<p>Произошла неизвестная ошибка при экспорте.</p>
-					<p>[ошибка из логовов]</p>
+					<div class="progress ">
+						<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
+							aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+					</div>
 				</div>
-	
-				<div class="modal-footer  row">
-					<button type="button" class="col-sm mx-2 btn btn-primary" data-bs-dismiss="modal">Окей</button>
-				</div>
-	
+				
+				
 			</div>
 
 		</div>
 	</div>
 
 	<!-- Модальное окно для нового проекта -->
-	<div class="modal show" id="modal-new-project" tabindex="-1" aria-modal="false">
+	<div class="modal" id="modal-new-project" tabindex="-1" aria-modal="false">
 		<div class="modal-dialog modal-dialog-centered " >
 
 			<div class="modal-content">
@@ -231,8 +228,8 @@
 	</div>
 
 	<!--File deleting panel-->
-	<div class="modal show" id="modal-delete-file" tabindex="-1" aria-modal="false" ><!--aria-hidden="false"? -->
-		<div class="modal-dialog modal-dialog-centered " >
+	<div class="modal" id="modal-delete-file" tabindex="-1" aria-modal="false" ><!--aria-hidden="false"? -->
+		<div class="modal-dialog modal-dialog-centered">
 
 			<div class="modal-content">
 
@@ -250,6 +247,36 @@
 					<button type="button" class="col-sm mx-2 btn btn-danger" id="delete-file">Удалить</button>
 				</div>
 
+			</div>
+
+		</div>
+	</div>
+
+	<!-- Reference panel -->
+	<div class="modal" id="modal-reference" tabindex="-1" aria-modal="false"  > 
+		<div class="modal-dialog modal-dialog-centered">
+
+			<div class="modal-content">
+			
+				<div class="modal-header">
+					<h5 class="modal-title">Справка</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+				</div>
+				
+				<div class="modal-body">
+					<p class="mb-2"><kbd>Пробел</kbd> - Включить/остановить воспроизведение</p>
+					<p class="mb-2"><kbd>←</kbd> <kbd class="my-2">→</kbd> - Шаг влево/вправо в рабочей области</p>
+					<p class="mb-2"><kbd>+</kbd> <kbd class="my-2">-</kbd> - Увеличить/уменьшить рабочую область</p>
+					<p class="mb-2"><kbd>Delete</kbd> - Удалить эпизод</p>
+					<p class="mb-2"><kbd>C</kbd> - Разделить эпизод</p>
+					<p class="mb-2"><kbd>V</kbd> - Дублировать эпизод</p>
+					<p class="mb-2"><kbd>ヾ(＾-＾)ノ</kbd> - Have fun! You the best! ❤</p>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="close-reference-panel">Закрыть</button>
+				</div>
+			
 			</div>
 
 		</div>
