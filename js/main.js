@@ -89,7 +89,7 @@ document.addEventListener('keydown', e => {
   } else if (e.key === "Delete") {
 		if (Track.selected) Track.selected.remove("delete");
 
-	} else if (e.key === "c" || e.key === "C" || e.key === "с" || e.key === "С")  {
+	} else if (e.key === "c" || e.key === "C" || e.key === "с" || e.key === "С" || e.key === "S" || e.key === "s" || e.key==="ы" || e.key === "Ы")  {
 		if (Track.selected) Track.selected.splitAt(previewTime - Track.selected.start);
 
   } else if (e.key == "v" || e.key == "V" || e.key === "м" || e.key === "М"){

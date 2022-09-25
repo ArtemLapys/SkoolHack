@@ -3,7 +3,7 @@
 @import url("modal.css");
 @import url("toolbar.css");
 @import url("preload.css");
-@import url("settings.css");
+@import url("kbd.css");
 
 ::-webkit-scrollbar {
 	width: 10px;

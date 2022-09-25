@@ -4,6 +4,23 @@ ffmpeg.load();
 
 document.querySelectorAll(".export").forEach(element => {
     element.addEventListener("click", async (e) => {
+
+        let haveLayers = false;
+        for (const layer of layers) {
+            if (layer.tracks.length > 0) {
+                haveLayers = true;
+                break;
+            }
+        }
+        if (!haveLayers) return;
+
+        let exportWindow = document.getElementById("modal-export-video")
+        let windowSucess = new bootstrap.Modal(exportWindow, {
+		    keyboard: true,
+		    focus: true
+        });
+        windowSucess.show();
+
         const inputPaths = [];
         //for(const layer of layers) {
             const layer = layers[0];
@@ -65,8 +82,12 @@ document.querySelectorAll(".export").forEach(element => {
           })
         );
         link.download = Date.now() + ".mp4";
+        
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+
+        setTimeout(function() {windowSucess.hide()}, 2000);
     });
 });
