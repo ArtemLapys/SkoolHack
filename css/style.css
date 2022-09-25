@@ -25,7 +25,7 @@ body{
 	-moz-user-select: none;
 	/* Firefox */
 	-ms-user-select: none;
-	/* Internet Explorer/Edge */
+	/* Internet Explore/Edge */
 	user-select: none;
 	color: aliceblue;
 	background-color: #22262c;
