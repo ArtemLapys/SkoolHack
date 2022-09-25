@@ -19,7 +19,7 @@ body {
 
 :root {
 	--metalayer: hsla(0, 0%, 100%, 0.05);
-    --layer: #2e2e2e;
+    --layer: hsla(0, 0%, 100%, 0.1);
 	--separator: rgba(255, 255, 255, 0.1);
 	--text: #fff;
 	--text-em: #0084ff;
@@ -76,7 +76,7 @@ body {
 }
 
 .major::after {
-	border-color: rgba(255, 255, 255, 0.3);
+	border-color: dodgerblue;
 }
 
 .playhead {
@@ -101,7 +101,110 @@ body {
 }
 
 .layer {
-	min-height: 30px;
+	min-height: 50px;
 	position: relative;
-	padding: 5px 0;
+}
+
+.layer:nth-child(2n+1) {
+	background-color: var(--layer);
+  }
+
+.track {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	background-repeat: repeat-x;
+	background-color: var(--metalayer);
+	background-position: center;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--start);
+	width: var(--length);
+	overflow: hidden;
+  }
+  .dragging {
+	position: fixed;
+	height: 40px;
+	opacity: 0.5;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+	margin: 0;
+	bottom: auto;
+	pointer-events: none;
+  }
+  
+  .trim {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	cursor: ew-resize;
+	width: 15px;
+  }
+  .trim-start {
+	left: 0;
+  }
+  .trim-start:hover {
+	border-left: 4px solid #0084ff;
+  }
+  .trim-end {
+	right: 0;
+  }
+  
+  .trim-end:hover {
+	border-right: 4px solid #0084ff;
+  }
+  
+  .selected {
+	position: relative;
+	margin: 0;
+	z-index: 10;
+	overflow: visible;
+	border: 2px solid #0084ff;
+  }
+  .audio.selected {
+	--background-size-y: 16px;
+  }
+  
+  .no-selected {
+	font-size: 12px;
+	padding: 10px;
+  }
+  
+  .placeholder {
+	background-color: var(--text-em);
+  }
+  
+  .selection {
+	position: absolute;
+	border: 1px solid rgba(0, 255, 255, 0.5);
+	background-color: rgba(0, 255, 255, 0.5);
+  }
+  
+  .selected .keys {
+	display: block;
+	min-height: 20px;
+  }
+  .selected .key-row {
+	position: relative;
+	height: 20px;
+  }
+  
+  .exporting .main,
+.exporting .timeline-scroller {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.exporting-msg {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 500px;
+  text-align: center;
+  margin: 50px auto;
+  font-size: 16px;
+}
+.exporting .exporting-msg {
+  display: block;
 }

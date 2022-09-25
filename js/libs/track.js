@@ -1,3 +1,8 @@
+const SNAP_DIST = 10; // px
+const MIN_LENGTH = 0.1; // s
+const DRAG_MIN_DIST = 5; // px
+const SELECT_PADDING = 12; // px
+
 class Track {
 
     constructor(source, props) {
@@ -226,6 +231,7 @@ class Track {
           this.possibleLayer = layer;
           layer.elem.appendChild(placeholder);
         }
+        updateLEFT();
         this.possibleStart = (clientX - this.dragOffsets[0] + scrollX - LEFT) / scale;
         if (!shiftKey) {
           this.possibleStart = Track.snapPoint(
@@ -283,7 +289,7 @@ class Track {
             if (!this.selectedKeys.length) this.selectedKeys = null;
             this.elem.removeChild(this.selectBox);
           } else {
-            log(actions.MOVE_KEYS);
+            //log(actions.MOVE_KEYS);
             this.selectedKeys.forEach(key => {
               key.time += this.keyDragData.dTime;
               key.elem.style.left = key.time * scale + 'px';
@@ -333,13 +339,13 @@ class Track {
         } else {
           if (Track.selected) Track.selected.unselected();
           this.selected();
-          if (!shiftKey) setPreviewTime(Math.max((clientX + scrollX - LEFT) / scale, 0), false);
+          //if (!shiftKey) setPreviewTime(Math.max((clientX + scrollX - LEFT) / scale, 0), false);
         }
         return;
       }
       this.jumpPoints = null;
       if (this.trimming) {
-        log(actions.TRIM, this.currentState);
+        //log(actions.TRIM, this.currentState);
         this.trimming = false;
         document.body.classList.remove('trimming');
         this.removeOutOfBoundKeys();
@@ -353,7 +359,7 @@ class Track {
       this.elem.style.top = null;
       const layer = this.possibleLayer;
       if (layer) {
-        log(actions.MOVE, this.currentState);
+        //log(actions.MOVE, this.currentState);
         this.placeholder.parentNode.removeChild(this.placeholder);
         this.start = this.possibleStart;
         this.updateLength();
@@ -382,7 +388,9 @@ class Track {
       document.body.classList.add('has-selection');
       this.layer.elem.classList.add('has-selected');
       this.elem.classList.add('selected');
-      Object.keys(this.keys).forEach(id => {
+
+      // document.getElementById('split').setProperty(:this})
+      /*Object.keys(this.keys).forEach(id => {
         if (!this.keys[id].length) {
           this.keyWrapper.removeChild(this.keys[id].elem);
           delete this.keys[id];
@@ -390,8 +398,8 @@ class Track {
       });
       this.displayProperties();
       this.props.handler = this.change;
-      this.props.keyHandler = this.keyChange;
-      propertiesList.appendChild(this.props.elem);
+      this.props.keyHandler = this.keyChange;*/
+      //propertiesList.appendChild(this.props.elem);
     }
   
     unselected() {
@@ -399,7 +407,8 @@ class Track {
       document.body.classList.remove('has-selection');
       this.layer.elem.classList.remove('has-selected');
       this.elem.classList.remove('selected');
-      propertiesList.removeChild(this.props.elem);
+
+      //propertiesList.removeChild(this.props.elem);
       if (this.selectedKeys) {
         this.selectedKeys.forEach(key => {
           key.elem.classList.remove('select');
@@ -412,7 +421,7 @@ class Track {
     // `time` is relative to track start
     splitAt(time, logThis = true) {
       if (time < MIN_LENGTH || time >= this.length - MIN_LENGTH) return;
-      if (logThis) log(actions.SPLIT);
+      //if (logThis) log(actions.SPLIT);
       const newTrack = this.source.createTrack();
       newTrack.setProps(this.toJSON());
       newTrack.setLeftSide(this.start + time);
@@ -430,7 +439,7 @@ class Track {
           this.elem.parentNode.removeChild(this.elem);
         }
         if (this.layer) {
-          if (reason !== 'range-delete') log(actions.REMOVE, this.currentState || getEntry());
+          //if (reason !== 'range-delete') log(actions.REMOVE, this.currentState || getEntry());
           this.layer.tracks.splice(this.index, 1);
           this.layer.updateTracks();
         }
@@ -444,7 +453,7 @@ class Track {
   
     change(prop, value, isFinal) {
       if (isFinal) {
-        log(actions.PROP_CHANGE, this.propChangesLog);
+        //log(actions.PROP_CHANGE, this.propChangesLog);
         this.propChangesLog = null;
       } else if (!this.propChangesLog) {
         this.propChangesLog = getEntry();
@@ -544,7 +553,7 @@ class Track {
               const rect = keys.iconBtn.getBoundingClientRect();
               easingEditor.set(keys.icon.fn);
               easingEditor.onchange = fn => {
-                log(actions.EASE_CHANGE);
+                //log(actions.EASE_CHANGE);
                 keys.icon.metadata.ease = fn;
                 if (this.selectedKeys) {
                   this.selectedKeys.forEach(key => key.ease = fn);
@@ -561,7 +570,7 @@ class Track {
     }
   
     keyChange(id, keyed) {
-      log(keyed ? actions.KEY : actions.UNKEY);
+      //log(keyed ? actions.KEY : actions.UNKEY);
       const relTime = clamp(previewTime - this.start, 0, this.length);
       if (keyed) {
         const key = this.createKey(id, {value: this[id], time: relTime});
@@ -601,7 +610,7 @@ class Track {
   
     deleteSelected() {
       if (this.selectedKeys) {
-        log(actions.DELETE_KEYS);
+        //log(actions.DELETE_KEYS);
         Object.keys(this.keys).forEach(id => {
           const keys = this.keys[id];
           for (let i = keys.length; i--;) {

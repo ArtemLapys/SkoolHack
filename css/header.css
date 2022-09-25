@@ -18,3 +18,31 @@ hr {
 	opacity: 0.25;
 }
 
+
+.nav-main-drop {
+	color: aliceblue;
+}
+
+.nav-main-drop:hover{
+	background: 0 0;
+	border: 0;
+	color:aliceblue;
+	border-radius: var(--bs-nav-pills-border-radius);
+	background-color: hsla(0, 0%, 100%, .05);
+}
+
+.nav-main-drop a:active {
+	color: aliceblue;
+}
+
+.dropdown-menu {
+	width: 100%;
+	background: 0 0;
+	border: 0;
+	color:aliceblue;
+	border-radius: var(--bs-nav-pills-border-radius);
+	background-color: rgba(0, 0, 0, 0.2);
+	backdrop-filter: blur(50px);
+}
+
+

@@ -41,8 +41,9 @@
 	min-width: 50%;
 	max-width: 100%;
 	max-height: 100%;
+	border-radius: 5px;
 	background-color: #000;
-	transition: all 0.2s ease-in-out;
+	transition: all 2s ease-in-out;
 
 }
 
@@ -86,4 +87,45 @@
 	justify-content: center;
 }
 
-  
+
+/* .video-file{
+	/* display: inline-flex;
+	align-items: center;
+	justify-content: center;
+
+
+	background-color: hsla(0, 0%, 100%, .1);
+	border-radius: var(--bs-nav-pills-border-radius);
+
+	display: inline-block;
+	width: 128px;
+	height: 72px;
+	cursor: pointer;
+	vertical-align: top;
+	margin: 5px;
+	overflow: hidden;
+	transition: all 0.2s ease-in-out;
+	word-break: break-word;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain; 
+}
+
+
+ .video-file:hover{
+	background-color: hsla(0, 0%, 100%, .3);
+} */
+
+
+.video .video-file .files-background-add{
+	opacity:60%;
+	backdrop-filter: blur(50px);
+
+
+}
+
+.name-file{
+	padding: 5px 10px;
+	text-shadow: 0 1px 3px rgb(0 0 0 / 100%);
+}
+

@@ -1,0 +1,20 @@
+﻿.toolbar {
+	color: aliceblue;
+	border-radius: var(--bs-nav-pills-border-radius);
+	background-color: hsla(0, 0%, 100%, .05);
+}
+
+.toolbar-main .toolbar-button {
+	background: 0 0;
+	border: 0;
+	color:aliceblue;
+	border-radius: var(--bs-nav-pills-border-radius);
+}
+
+.toolbar-main .toolbar-button:hover {
+	background: 0 0;
+	border: 0;
+	color:dodgerblue;
+	border-radius: var(--bs-nav-pills-border-radius);
+	transition: all 0.2s ease-in-out;
+}

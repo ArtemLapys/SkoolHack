@@ -56,3 +56,23 @@ function isAdjustableInput(elem, onchange, oninput) {
   );
   return elem;
 }
+
+function mod(n, m) {
+  return ((n % m) + m) % m;
+}
+
+function clamp(val, min, max) {
+  return Math.max(Math.min(val, max), min);
+}
+
+function sToTime(duration) {
+  var hours = parseInt((duration / (60 * 60)) % 24)
+      , minutes = parseInt((duration / 60) % 60)
+      , seconds = parseInt(duration - (hours * 60 * 60 + minutes * 60));
+
+  hours = (hours < 10) ? "0" + hours : hours;
+  minutes = (minutes < 10) ? "0" + minutes : minutes;
+  seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+  return hours + ":" + minutes + ":" + seconds;
+}

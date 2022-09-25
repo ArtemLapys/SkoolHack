@@ -3,14 +3,14 @@ class Layer {
     constructor() {
       this.elem = Elem('div', {
         className: 'layer',
-        /*oncontextmenu: e => {
+        oncontextmenu: e => {
           if (e.target === this.elem) {
             layerMenu.items[0].disabled = this.index === 0;
             layerMenu.items[1].disabled = this.index === layers.length - 1;
             layerMenu.items[4].disabled = this.index === layers.length - 1 && !this.tracks.length;
             layerMenu.open(e.clientX, e.clientY, this);
           }
-        }*/
+        }
       });
       this.removeBox = Elem('div', {
         className: 'remove'
@@ -114,6 +114,12 @@ class Layer {
       layers.splice(this.index, 0, layer);
       updateLayers();
     }
+    insertAfter(layer = new Layer()) {
+      layers[layer.index + 1].insertBefore(layer.elem, this.elem);
+      layers.splice(this.index + 1, 0, layer);
+      if (layer.index + 1 == layers.length) addLayer()
+      updateLayers();
+    }
   
     addAudioTracksTo(dest) {
       return this.tracks.map(track => {
@@ -135,3 +141,76 @@ class Layer {
     }
   
   }
+  
+  function getEntry() {
+    return {
+      layers: layers.map(layer => layer.tracks.map(track => track.toJSON())),
+      type: currentVideoType === 'custom' ? {
+        name: 'custom',
+        width: preview.width,
+        height: preview.height,
+        bitrate: exportBitrate,
+      } : currentVideoType,
+      format: usingExportType
+    };
+  }
+  
+  function setEntry(entry) {
+    const {layers, type, format} = entry.layers ? entry : {
+      ...getEntry(),
+      layers: entry
+    };
+    clearLayers();
+    layers.forEach(tracks => {
+      const layer = new Layer();
+      tracks.forEach(data => {
+        const track = sources[data.source].createTrack();
+        track.setProps(data);
+        track.updateLength();
+        layer.addTrack(track);
+        if (data.selected) track.selected();
+      });
+      addLayer(layer);
+    });
+    setVideoType(type, false);
+    usingExportType = format;
+    selectEncode.textContent = format;
+    rerender();
+  }
+  
+  // made such that the bounds should be subtracted by the scrollY
+function getLayerBounds() {
+  return layers.map(layer => {
+    const {top, bottom} = layer.elem.getBoundingClientRect();
+    return {layer, top: top + scrollY, bottom: bottom + scrollY};
+  });
+}
+
+function getAllJumpPoints() {
+  const arr = [];
+  layers.forEach(layer => arr.push(...layer.getJumpPoints()));
+  //if (!playing) arr.push(previewTime);
+  arr.sort((a, b) => a - b);
+  return arr.filter((t, i) => t !== arr[i + 1]);
+}
+
+async function rerender() {
+  await previewTimeReady;
+  c.clearRect(0, 0, c.canvas.width, c.canvas.height);
+  let length = 0;
+  layers.forEach(layer => {
+    if (layer.tracks.length) {
+      const lastTrack = layer.tracks[layer.tracks.length - 1];
+      if (lastTrack.end > length) {
+        length = lastTrack.end;
+      }
+    }
+    const track = layer.trackAt(previewTime);
+    if (track) {
+      track.render(c, previewTime - track.start);
+      return track;
+    }
+  });
+  editorLength = length;
+  //lengthSpan.textContent = Math.floor(length / 60) + ':' + ('0' + Math.floor(length % 60)).slice(-2);
+}

@@ -1,6 +1,10 @@
 const scrollWrapper = document.getElementById('scroll');
 const timeMarkers = document.getElementById('axis');
 const playheadMarker = document.getElementById('playhead');
+const playButton = document.getElementById('play');
+const zoomInBtn = document.getElementById('zoom-in');
+const zoomOutBtn = document.getElementById('zoom-out');
+const playIcon = playButton.firstChild;
 //const currentSpan = document.getElementById('current');
 const LEFT_PADDING = 5;
 var LEFT = scrollWrapper.getBoundingClientRect().left
@@ -30,6 +34,7 @@ function renderScale() {
       }
     }, [t % majorStep === 0 ? t + 's' : '']));
   }
+  document.getElementById("layers").setAttribute("style", `width: ${maxTime*scale}px;`)
 }
 window.requestAnimationFrame(renderScale);
 
@@ -55,15 +60,19 @@ function previewTimeAt(time = previewTime, prepare = true) {
         return track.prepare(time - track.start);
       }
     }));
-    //previewTimeReady.then(rerender);
+    previewTimeReady.then(rerender);
   }
-  if (Track.selected) Track.selected.displayProperties();
+  //if (Track.selected) Track.selected.displayProperties();
+}
+
+function updateLEFT() {
+  LEFT = scrollWrapper.getBoundingClientRect().left + LEFT_PADDING;
 }
 
 let previewTime, wasPlaying, editorLength;
 isDragTrigger(scrollWrapper, (e, switchControls) => {
-    LEFT = scrollWrapper.getBoundingClientRect().left + LEFT_PADDING;
-  /*const closest = e.target.closest('.track');
+  updateLEFT();
+  const closest = e.target.closest('.track');
   if (closest && !closest.classList.contains('selected')) {
     switchControls(null);
   } else {
@@ -75,18 +84,93 @@ isDragTrigger(scrollWrapper, (e, switchControls) => {
     }
     if (Track.selected && !closest) {
       Track.selected.unselected();
-    }*/
+    }
     window.requestAnimationFrame(() => {
       previewTimeAt((e.clientX + scrollX - LEFT) / scale, 0);
       //console.log(LEFT)
       //console.log(Math.max((e.clientX + scrollX - LEFT) / scale, 0).toString());
     });
-  //}
+  }
 }, e => {
   previewTimeAt(Math.max((e.clientX + scrollX - LEFT) / scale, 0));
 }, e => {
-  //if (wasPlaying) play();
+  if (wasPlaying) play();
 });
+const OFFSCREEN_PADDING = 20;
+function setPreviewTime(time, scrollTo = true) {
+  let wasPlaying = playing;
+  if (wasPlaying) stop();
+  previewTimeAt(time);
+  if (scrollTo) {
+    if (previewTime < (scrollX - LEFT + OFFSCREEN_PADDING) / scale
+      || previewTime > (scrollX + windowWidth - LEFT - OFFSCREEN_PADDING) / scale) {
+      scrollWrapper.scrollLeft = previewTime * scale - (windowWidth - LEFT) / 2;
+    }
+  }
+  if (wasPlaying) play();
+}
 previewTimeAt(0);
 
 addLayer();
+
+
+let playing = false;
+async function play(exporting = false) {
+  if (playing) return;
+  await Promise.all(layers.map(layer => {
+    layer.playing = layer.trackAt(previewTime);
+    return Promise.all(layer.tracks.map(track => {
+      return track === layer.playing
+        ? track.prepare(previewTime - track.start).then(() => {
+          track.render(c, previewTime - track.start, true);
+        })
+        : track.prepare(0);
+    }));
+  }));
+  playing = {
+    start: Date.now(),
+    startTime: previewTime,
+    exporting
+  };
+  playIcon.textContent = 'pause_circle';
+  playButton.title = "Приостановить";
+  paint();
+}
+let nextAnimationFrame;
+function paint() {
+  if (!playing) return;
+  nextAnimationFrame = window.requestAnimationFrame(paint);
+  previewTimeAt((Date.now() - playing.start) / 1000 + playing.startTime, false);
+  c.clearRect(0, 0, c.canvas.width, c.canvas.height);
+  layers.forEach(layer => {
+    const track = layer.trackAt(previewTime);
+    if (track) {
+      if (layer.playing === track) {
+        track.render(c, previewTime - track.start);
+      } else {
+        if (layer.playing) layer.playing.stop();
+        track.render(c, previewTime - track.start, true);
+        layer.playing = track;
+      }
+    } else if (layer.playing) {
+      layer.playing.stop();
+      layer.playing = null;
+    }
+  });
+  if (playing.exporting && previewTime > editorLength) {
+    playing.exporting(true);
+    stop();
+  }
+}
+function stop() {
+  layers.forEach(layer => {
+    if (layer.playing) {
+      layer.playing.stop();
+      layer.playing = null;
+    }
+  });
+  playing = false;
+  playIcon.textContent = 'play_circle';
+  playButton.title="Проигрывать";
+  window.cancelAnimationFrame(nextAnimationFrame);
+}
