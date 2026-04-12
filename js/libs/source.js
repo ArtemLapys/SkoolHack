@@ -9,26 +9,46 @@ class Source {
     constructor(file, id) {
       this.file = file;
       this.url = URL.createObjectURL(file);
+      // if id provided (uploadId) — use it as unique id and keep file.name as display name.
       if (id) {
         this.id = id;
-        this.name = id.slice(id.indexOf('-') + 1);
+        this.name = file.name;
       } else {
         this.name = file.name;
         this.id = Math.random().toString(36).slice(2) + '-' + file.name;
-        //sources[this.id] = this;
       }
       this.tracks = [];
-      console.log(Array.from(document.getElementById("files-users-click").childNodes)[document.getElementById("files-users-click").childElementCount - 2])
-      this.elem = Array.from(document.getElementById("files-users-click").childNodes)[document.getElementById("files-users-click").childElementCount - 2]/*Elem('div', {
-        className: 'source disabled',
-        tabIndex: 0,
-        oncontextmenu: e => {
-          sourceMenu.items[1].disabled = this.tracks.length;
-          sourceMenu.open(e.clientX, e.clientY, this);
+      // Try reuse existing preview element created by addButtonNormal (matching data-upload-id).
+      const filesContainer = document.getElementById("files-users-click");
+      if (filesContainer && id) {
+        const existing = filesContainer.querySelector(`[data-upload-id="${id}"]`);
+        if (existing) {
+          this.elem = existing;
+          // mark bound to avoid duplicate use
+          this.elem.dataset.sourceBound = this.id;
+          // ensure class names expected by rest of app
+          this.elem.classList.add('source');
         }
-      }, [
-        Elem('span', {className: 'name'}, [this.name])
-      ]);*/
+      }
+      // if no existing element found — create new one (fallback)
+      if (!this.elem) {
+        this.elem = Elem('div', {
+          className: 'source disabled',
+          tabIndex: 0,
+          oncontextmenu: e => {
+            try { sourceMenu.items[1].disabled = this.tracks.length; } catch (err) {}
+            try { sourceMenu.open(e.clientX, e.clientY, this); } catch (err) {}
+          }
+        }, [
+          Elem('span', { className: 'name' }, [ this.name ])
+        ]);
+        if (filesContainer) {
+          filesContainer.appendChild(this.elem);
+          this.elem.dataset.sourceBound = this.id;
+        } else {
+          console.warn('files-users-click container not found; source element created but not appended');
+        }
+      }
       isDragTrigger(this.elem, (e, switchControls) => {
         const track = this.createTrack();
         track.dragStart(e, [5, 5], true);
@@ -98,6 +118,8 @@ class Source {
       super(...args);
       this.elem.classList.add('image');
       this.thumbnail = this.url;
+      // default duration for images so tracks get reasonable length on timeline and playback
+      this.length = this.length || 5; // seconds
       this.image = new Image();
       this.image.onload = e => {
         this.width = this.image.width;

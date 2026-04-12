@@ -8,6 +8,19 @@
 	overflow-y: overlay;
 }
 
+/* Добавляем ограничение и прокрутку для контейнера, где появляются превью файлов */
+#files-users-click {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	max-height: 420px; /* чуть меньше, чтобы помещался заголовок/паддинги */
+	overflow-y: auto;
+	overflow-x: hidden;         /* запрет горизонтального скролла */
+	padding: 8px;
+	box-sizing: border-box;
+	align-content: flex-start;   /* избегаем растягивания строк при wrap */
+}
+
 .main-files{
 	width: 313px;
 	display: flex;
@@ -69,6 +82,7 @@
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: contain;
+	box-sizing: border-box;
 }
 	
 .files-background-add:hover {
@@ -81,12 +95,119 @@
 	justify-content: center;
 }
 
+#files-users-click .files-add {
+	flex: 0 0 100%;
+	width: 100%;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px;
+	margin: 0;                   /* убрать внешние отступы, которые могли вызывать overflow */
+}
+
 .video .video-file .files-background-add{
 	opacity:60%;
 	backdrop-filter: blur(50px);
 }
 
+.name{
+	font-size: 12px;
+}
+
 .name-file{
 	padding: 5px 10px;
 	text-shadow: 0 1px 3px rgb(0 0 0 / 100%);
+	box-sizing: border-box;
+	font-size: 12px;
+}
+
+/* Плейсхолдер рядом с заголовком файлов (Desktop hidden by default, shown by JS on small) */
+#files-add-placeholder {
+	display: none;
+}
+
+/* Стили для кнопки после перемещения в header (узкий макет) */
+.files-add-in-header {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	padding: 6px 12px;
+	border-radius: 8px;
+	background-color: rgba(255,255,255,0.06);
+	width: 100%;           /* будет ограничен контейнером плейсхолдера */
+	max-width: 240px;      /* максимальная ширина кнопки рядом с заголовком */
+	box-sizing: border-box;
+	margin-left: 12px;
+}
+
+/* Адаптация: при ширине экрана <= 1280px ставим превью сверху, файлы снизу и растягиваем их */
+@media (max-width: 1280px) {
+	/* Ставит колонки в столбец и центрирует содержимое */
+	.main {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	/* Превью сверху */
+	.main-video {
+		order: 1;
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		padding: 8px 0;
+	}
+
+	/* Ограничение размеров превью (адаптивно) */
+	#playback {
+		width: 100%;
+		max-width: 950px;
+		height: auto;
+		max-height: 550px;
+		border-radius: 8px;
+	}
+
+	/* Блок файлов под превью, растянут на всю ширину */
+	.main-files {
+		order: 2;
+		width: 100%;
+		margin-right: 0;
+		padding: 8px;
+		box-sizing: border-box;
+	}
+
+	/* Контейнер превью файлов занимает всю ширину */
+	#files-users-click {
+		width: 100%;
+		padding: 8px;
+		box-sizing: border-box;
+	}
+
+	/* Кнопка добавления и превью занимают строки */
+	#files-users-click .files-add {
+		flex-basis: 100%;
+		width: 100%;
+	}
+
+	#files-users-click .video-file,
+	#files-users-click .files-background-add {
+		flex: 0 0 auto;
+	}
+
+	#files-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	#files-add-placeholder {
+		display: block; /* видим, когда JS перенёс кнопку */
+		flex: 0 0 auto;
+	}
+
+	/* сделать кнопку визуально растянутой с отступами (если нужно растянуть больше) */
+	#files-add-placeholder .files-add-in-header {
+		max-width: calc(100% - 120px); /* оставляем место для заголовка */
+	}
 }

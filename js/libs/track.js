@@ -24,7 +24,16 @@ class Track {
           backgroundImage: source.thumbnail && `url(${encodeURI(source.thumbnail)})`
         },
         oncontextmenu: e => {
-          trackMenu.open(e.clientX, e.clientY, this);
+          try {
+            if (typeof trackMenu !== 'undefined' && trackMenu && typeof trackMenu.open === 'function') {
+              trackMenu.open(e.clientX, e.clientY, this);
+            } else {
+              // fallback: prevent default if no menu exists
+              e.preventDefault();
+            }
+          } catch (err) {
+            e.preventDefault();
+          }
           if (!e.shiftKey) setPreviewTime(Math.max((e.clientX + scrollX - LEFT) / scale, 0), false);
         }
       }, [
@@ -153,7 +162,9 @@ class Track {
       } else {
         if (this.layer) {
           this.layer.tracks.splice(this.index, 1);
-          this.layer.updateTracks();
+          if (this.layer && typeof this.layer.updateTracks === 'function') {
+            try { this.layer.updateTracks(); } catch(e) {}
+          }
         }
         this.layerBounds = getLayerBounds();
         this.jumpPoints = getAllJumpPoints();
@@ -386,7 +397,9 @@ class Track {
     selected() {
       Track.selected = this;
       document.body.classList.add('has-selection');
-      this.layer.elem.classList.add('has-selected');
+      if (this.layer && this.layer.elem) {
+        try { this.layer.elem.classList.add('has-selected'); } catch(e){}
+      }
       this.elem.classList.add('selected');
 
       // document.getElementById('split').setProperty(:this})
@@ -405,7 +418,9 @@ class Track {
     unselected() {
       Track.selected = null;
       document.body.classList.remove('has-selection');
-      this.layer.elem.classList.remove('has-selected');
+      if (this.layer && this.layer.elem) {
+        try { this.layer.elem.classList.remove('has-selected'); } catch(e){}
+      }
       this.elem.classList.remove('selected');
 
       //propertiesList.removeChild(this.props.elem);
@@ -441,7 +456,9 @@ class Track {
         if (this.layer) {
           //if (reason !== 'range-delete') log(actions.REMOVE, this.currentState || getEntry());
           this.layer.tracks.splice(this.index, 1);
-          this.layer.updateTracks();
+          if (this.layer && typeof this.layer.updateTracks === 'function') {
+            try { this.layer.updateTracks(); } catch(e) {}
+          }
         }
       }
       if (Track.selected === this) {
@@ -734,7 +751,9 @@ class Track {
         source,
         props
       );
-      this.trimEnd = this.source.length;
+      // ensure trimStart exists and trimEnd is well-defined (fallback to 5s)
+      this.trimStart = 0;
+      this.trimEnd = (typeof this.source.length === 'number' && !isNaN(this.source.length)) ? this.source.length : 5;
       this.updateLength();
     }
   
@@ -934,6 +953,14 @@ class Track {
         ImageTrack.props
       );
       this.elem.classList.add('image');
+      // ensure image track has a default length from source so it renders in preview
+      // and can be dragged immediately
+      try {
+        // source.length set in ImageSource (fallback earlier to 5s)
+        if (!this.length && this.source && this.source.length) this.length = this.source.length;
+      } catch (e) {}
+      // update visual length immediately
+      try { this.updateLength(); } catch (e) {}
     }
   
     showChange(prop, value, isFinal) {
