@@ -38,6 +38,9 @@ stopButton.addEventListener("click", (e) => {
 });
 
 playButton.addEventListener("click", (e) => {
+	if (typeof globalThis.resumeTimelineAudio === 'function') {
+		globalThis.resumeTimelineAudio();
+	}
 	if (playing) stop();
 	else play();
 });

@@ -15,6 +15,14 @@ const playIcon = playButton.firstChild;
 const LEFT_PADDING = 5;
 var LEFT = scrollWrapper.getBoundingClientRect().left
 
+function resumeTimelineAudio() {
+  if (!globalThis.audioContext || typeof globalThis.audioContext.resume !== 'function') return;
+  if (globalThis.audioContext.state === 'running') return;
+  globalThis.audioContext.resume().catch(() => {});
+}
+
+globalThis.resumeTimelineAudio = resumeTimelineAudio;
+
 const BASE_SCALE = 3;
 const MAX_SCALE = 5;
 let logScale = 1, scale = BASE_SCALE * 2 ** logScale;
@@ -189,6 +197,7 @@ syncStickyTimelineAxis();
 let playing = false;
 async function play(exporting = false) {
   if (playing) return;
+  resumeTimelineAudio();
   await Promise.all(layers.map(layer => {
     layer.playing = layer.trackAt(previewTime);
     return Promise.all(layer.tracks.map(track => {

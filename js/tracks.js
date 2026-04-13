@@ -53,6 +53,8 @@ function waitForTrackVideoFrame(video, timeout = 1000) {
 
 async function warmupTrackVideo(video) {
   if (!video) return;
+  const prevMuted = video.muted;
+  video.muted = true;
 
   try {
     const playPromise = video.play();
@@ -64,6 +66,7 @@ async function warmupTrackVideo(video) {
   await waitForTrackVideoFrame(video, 350);
 
   try { video.pause(); } catch (error) {}
+  video.muted = prevMuted;
 }
 
 class Track {
@@ -988,7 +991,12 @@ class MediaTrack extends Track {
   render(ctx, time, play = false) {
     super.render(ctx, time, play);
     this.media.volume = this.volume / 100;
-    if (play) this.media.play();
+    if (play) {
+      const playPromise = this.media.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    }
   }
 
   stop() {
@@ -1017,7 +1025,6 @@ class VideoTrack extends MediaTrack {
     this.mediaLoaded = new Promise(res => videoLoaded = res);
     this.media = Elem('video', {
       src: this.source.url,
-      muted: true,
       playsInline: true,
       preload: 'auto',
       loop: true,
@@ -1027,6 +1034,8 @@ class VideoTrack extends MediaTrack {
       }
     });
     this.media.setAttribute('webkit-playsinline', 'true');
+    this.media.defaultMuted = false;
+    this.media.muted = false;
   }
 
   showChange(prop, value, isFinal) {

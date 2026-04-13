@@ -1,7 +1,8 @@
 const thumbnailCanvas = Elem('canvas');
 const thumbnailContext = thumbnailCanvas.getContext('2d');
 const thumbnailAudio = Elem('audio');
-const audioContext = new AudioContext();
+const AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext;
+const audioContext = AudioContextClass ? new AudioContextClass() : null;
 
 function waitForDecodedVideoFrame(video, timeout = 1000) {
   return new Promise(resolve => {
@@ -53,8 +54,11 @@ function waitForDecodedVideoFrame(video, timeout = 1000) {
 
 async function warmupVideoForCanvas(video) {
   if (!video) return;
+  const prevMuted = video.muted;
+  video.muted = true;
   if (video.readyState >= 2 && video.currentTime > 0) {
     await waitForDecodedVideoFrame(video, 350);
+    video.muted = prevMuted;
     return;
   }
 
@@ -68,6 +72,7 @@ async function warmupVideoForCanvas(video) {
   await waitForDecodedVideoFrame(video, 350);
 
   try { video.pause(); } catch (error) {}
+  video.muted = prevMuted;
 }
 
 class Source {
@@ -315,6 +320,12 @@ class AudioSource extends Source {
   constructor(...args) {
     super(...args);
     this.elem.classList.add('audio');
+    if (!audioContext) {
+      this.length = this.length || 5;
+      this.thumbnail = '';
+      this.amReady();
+      return;
+    }
     fetch(this.url)
       .then(r => r.arrayBuffer())
       .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
