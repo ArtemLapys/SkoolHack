@@ -19,3 +19,29 @@
 .modal-body p{
 	margin:0;
 }
+
+.modal-link{
+	color: #ff8b8b;
+	text-decoration: none;
+}
+
+.modal-link:hover{
+	color: #ffb0b0;
+	text-decoration: underline;
+}
+
+.form-select,
+.form-select:focus{
+	background-color: rgba(255, 255, 255, 0.04);
+	color: aliceblue;
+	border-color: hsla(0, 0%, 100%, .08);
+	box-shadow: none;
+}
+
+.form-text{
+	color: rgba(240, 248, 255, 0.75) !important;
+}
+
+.accordion-button:focus{
+	box-shadow: none;
+}

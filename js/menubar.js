@@ -3,6 +3,7 @@ const splitMenuButton = document.getElementById('split-item')
 const dublicateMenuButton = document.getElementById('dublicate-item')
 const removeMenuButton = document.getElementById('remove-item')
 const referenceButton = document.getElementById('reference-in-menu')
+const headerReferenceButton = document.getElementById('header-help-link')
 const closeReferenceButton = document.getElementById('close-reference-panel')
 
 splitMenuButton.addEventListener("click", (e) => {
@@ -35,10 +36,15 @@ let windowSucess = new bootstrap.Modal(referenceWindow, {
 		focus: true
 });
 
-referenceButton.addEventListener('click', e => {
+referenceButton?.addEventListener('click', e => {
 	windowSucess.show();
 });
 
-closeReferenceButton.addEventListener('click', e => {
+headerReferenceButton?.addEventListener('click', e => {
+	e.preventDefault();
+	windowSucess.show();
+});
+
+closeReferenceButton?.addEventListener('click', e => {
 	windowSucess.hide();
 });

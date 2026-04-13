@@ -2,6 +2,7 @@ const playback = document.getElementById("playback");
 const c = playback.getContext("2d");
 const layersWrapper = document.getElementById("layers");
 const layers = [];
+window.layers = layers;
 
 function updateLayers() {
 	layers.forEach((layer, i) => {
@@ -32,8 +33,10 @@ function exportVideo() {
 	// reduce lag by hiding some things
 	if (playing) stop();
 	if (Track.selected) Track.selected.unselected();
-	if (easingEditor.isOpen) easingEditor.close();
+	if (globalThis.easingEditor?.isOpen) globalThis.easingEditor.close();
 	document.body.classList.add("exporting");
+
+	const projectName = typeof globalThis.actualname === 'string' ? globalThis.actualname : '';
 
 	const stream = playback.captureStream();
 	const dest = audioContext.createMediaStreamDestination();
@@ -50,42 +53,64 @@ function exportVideo() {
 	});
 
 	let download = true;
-	recorder.addEventListener("dataavailable", (e) => {
-		const newVideo = document.createElement("video");
-		exportedURL = URL.createObjectURL(e.data);
-		if (download) {
-			const saveLink = document.createElement("a");
-			saveLink.href = exportedURL;
-			if (actualname !== "") {
-				// find the project video extension (e.g video/x-matroska) is .mkv
-				const ext = usingExportType.split("/")[1];
-				if (ext.includes("webm")) {
-					saveLink.download = actualname + ".webm";
-				} else if (ext.includes("mpeg")) {
-					saveLink.download = actualname + ".mp4";
-				} else if (ext.includes("x-matroska")) {
-					saveLink.download = actualname + ".mkv";
-				}
-			} else {
-				saveLink.download = "forward-export.webm";
-			}
-			document.body.appendChild(saveLink);
-			saveLink.click();
-			document.body.removeChild(saveLink);
-		}
-	});
 
 	previewTimeAt(0, false);
 
-	return new Promise((res) => {
+	const dataReady = new Promise((resolve, reject) => {
+		recorder.addEventListener("dataavailable", (e) => {
+			try {
+				exportedURL = URL.createObjectURL(e.data);
+				if (download) {
+					const saveLink = document.createElement("a");
+					saveLink.href = exportedURL;
+					if (projectName !== "") {
+						const ext = usingExportType.split("/")[1];
+						if (ext.includes("webm")) {
+							saveLink.download = projectName + ".webm";
+						} else if (ext.includes("mpeg")) {
+							saveLink.download = projectName + ".mp4";
+						} else if (ext.includes("x-matroska")) {
+							saveLink.download = projectName + ".mkv";
+						} else {
+							saveLink.download = projectName + ".webm";
+						}
+					} else {
+						saveLink.download = "forward-export.webm";
+					}
+					document.body.appendChild(saveLink);
+					saveLink.click();
+					document.body.removeChild(saveLink);
+				}
+				resolve(true);
+			} catch (error) {
+				reject(error);
+			}
+		}, { once: true });
+
+		recorder.addEventListener("error", (event) => {
+			reject(event?.error || new Error("Browser export failed."));
+		}, { once: true });
+	});
+
+	return new Promise((resolve, reject) => {
 		recorder.start();
-		audioContext.resume().then(() => play(res));
-	}).then((successful) => {
+		audioContext.resume().then(() => play(resolve)).catch(reject);
+	}).then(async (successful) => {
 		download = successful;
 		recorder.stop();
+		await dataReady;
 		document.body.classList.remove("exporting");
 		sources.forEach((source) => {
 			source.disconnect(dest);
 		});
+		return successful;
+	}).catch((error) => {
+		document.body.classList.remove("exporting");
+		sources.forEach((source) => {
+			source.disconnect(dest);
+		});
+		throw error;
 	});
 }
+
+window.exportVideo = exportVideo;

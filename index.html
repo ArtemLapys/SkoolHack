@@ -1,18 +1,46 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="ru">
 
 <head lang="ru">
 	<script src="coi-serviceworker.min.js"></script>
-	<script src="js/libs/ffmpeg/ffmpeg.dev.js"></script>
 	
 	<meta charset="UTF-8">
-	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>viGU - Видеоредактор</title>
+	<title id="meta-title">viGu Видеоредактор — онлайн монтаж, экспорт видео и HDR-обработка</title>
+	<meta id="meta-description" name="description" content="viGu Видеоредактор — удобный браузерный видеоредактор для монтажа, нарезки, дублирования клипов, работы с изображениями и экспорта видео с выбором качества, FPS и HDR-обработки.">
+	<meta id="meta-keywords" name="keywords" content="видеоредактор, онлайн видеоредактор, монтаж видео, экспорт видео, HDR видео, ffmpeg wasm, видеомонтаж в браузере, viGu">
+	<meta name="robots" content="index,follow">
+	<meta name="theme-color" content="#22262c">
+	<meta property="og:type" content="website">
+	<meta id="meta-og-locale" property="og:locale" content="ru_RU">
+	<meta id="meta-og-title" property="og:title" content="viGu Видеоредактор">
+	<meta id="meta-og-description" property="og:description" content="Браузерный видеоредактор для монтажа, работы с таймлайном, HDR-экспорта и быстрого рендера прямо в вебе.">
+	<meta property="og:image" content="img/icon.png">
+	<meta id="meta-og-site-name" property="og:site_name" content="viGu Видеоредактор">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta id="meta-twitter-title" name="twitter:title" content="viGu Видеоредактор">
+	<meta id="meta-twitter-description" name="twitter:description" content="Монтаж, экспорт и HDR-обработка видео в браузере.">
+	<link rel="canonical" href="https://github.com/ArtemLapys/SkoolHack">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
 
-	<!-- <link rel="preload" href="/css/style.css" as="style"> -->	
+	<!-- <link rel="preload" href="/css/style.css" as="style"> -->
+	
+	<!-- Yandex.Metrika counter -->
+	<script type="text/javascript">
+		(function(m,e,t,r,i,k,a){
+			m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+			m[i].l=1*new Date();
+			for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+			k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+		})(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=108510995', 'ym');
+
+		ym(108510995, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+	</script>
+	<noscript><div><img src="https://mc.yandex.ru/watch/108510995" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+	<!-- /Yandex.Metrika counter -->
+
+
 	<link rel="preload" href="css/preload.css" as="style">
 	<link rel="preload" href="js/preload.js" as="script">
 	<link rel="stylesheet" href="css/style.css">
@@ -27,82 +55,113 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&amp;display=swap" rel="stylesheet">
 	<link rel="shortcut icon" href="img/icon.png" type="image/png">
+	<script id="ld-app" type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "SoftwareApplication",
+		"name": "viGu Видеоредактор",
+		"applicationCategory": "MultimediaApplication",
+		"operatingSystem": "Web",
+		"description": "Браузерный видеоредактор для монтажа, экспорта видео, работы с HDR и таймлайном.",
+		"url": "https://github.com/ArtemLapys/SkoolHack",
+		"author": {
+			"@type": "Organization",
+			"name": "RED Dynasty"
+		}
+	}
+	</script>
+	<script id="ld-faq" type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "FAQPage",
+		"mainEntity": [
+			{
+				"@type": "Question",
+				"name": "Что умеет viGu?",
+				"acceptedAnswer": {
+					"@type": "Answer",
+					"text": "viGu помогает быстро собрать ролик в браузере: добавить видео и изображения, расставить их на таймлайне, обрезать, дублировать, удалить лишнее и экспортировать готовый файл."
+				}
+			},
+			{
+				"@type": "Question",
+				"name": "Почему обработка может идти медленно?",
+				"acceptedAnswer": {
+					"@type": "Answer",
+					"text": "Экспорт идёт прямо в браузере через FFmpeg WebAssembly. Чем выше качество, FPS и сложнее HDR-обработка, тем больше времени требуется. Для ускорения можно выбрать меньшее разрешение, снизить FPS или включить быстрый HDR-режим."
+				}
+			},
+			{
+				"@type": "Question",
+				"name": "Какой режим HDR выбрать?",
+				"acceptedAnswer": {
+					"@type": "Answer",
+					"text": "Медленный режим старается аккуратнее сохранить цвет и тон HDR-видео. Быстрый режим подходит, когда важнее скорость рендера и нужен более лёгкий экспорт."
+				}
+			}
+		]
+	}
+	</script>
 </head>
 
 <body style="background-color: #22262c;">
 	<!-- Шапка -->
 	<div id="page-preloader" class="preloader">
 		<div class="loader d-flex mx-2 navbar navbar-expand-md">
-			<p class="my-auto">RED</p>
-			<p class="badge bg-danger mx-1">DYNASTY</p>
+			<p class="my-auto">viGu</p>
+			<p class="badge preload-badge mx-1" data-i18n="brand.badge">Видеоредактор</p>
 			
 		</div>
 	</div>
 
 	<div class="container">
-		<header class=" py-3 row">
+		<header class="page-header py-3">
+			<div class="header-row">
+				<div class="editor-brand editor-brand--compact">
+					<a href="#editor-top" class="editor-brand__title">viGu</a>
+					<span class="editor-brand__tag" data-i18n="brand.badge">Видеоредактор</span>
+					<span class="editor-brand__hint" data-i18n="brand.hint">Видеоредактор для быстрого монтажа, экспорта и HDR-обработки прямо в браузере</span>
+				</div>
 
-			<nav class="col-sm navbar navbar-expand-md sticky-top">
-				<ul class="nav nav-pills mx-2 header-text justify-content-left">
+				<div class="language-switcher" aria-label="Language switcher" data-i18n-attr="aria-label:header.languageSwitcher">
+					<button type="button" class="language-switcher__button is-active" data-lang="ru">RU</button>
+					<button type="button" class="language-switcher__button" data-lang="en">EN</button>
+				</div>
 
-					<li class="nav-item-text"><a href="#" class="nav-link active" aria-current="page">Редактор</a></li>	
-					<li class="nav-item-text">
+				<div class="header-actions header-actions--inline">
+					<nav class="header-nav" aria-label="Основная навигация" data-i18n-attr="aria-label:header.navAria">
+						<a href="#faq" class="nav-link">FAQ</a>
+					</nav>
 
+					<div class="header-tools">
 						<div class="btn-group">
-
-							<button type="button" class="  nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false" id="contextMenuFile"> <!--dropdown-toggle-->
-								Файл
-							</button>
-
-							<ul class="dropdown-menu ">
-								<input id="selectFile-in-menu" for="file-add" type="file" style="display: none">
-								<li><a class="dropdown-item" href="#" >Открыть файл</a></li>
-								<li><a class="dropdown-item export" href="#">Экспортировать</a></li>
-								<li><hr class="m-2 border-1 border-top"></li>
-								<li><a id="reference-in-menu" class="dropdown-item" href="#">Справка</a></li>
-							</ul>
-
-						</div>
-
-					</li>
-
-					<li class="nav-item-text">
-						<div class="btn-group">
-
-							<button type="button" class="  nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false"> <!--dropdown-toggle-->
-								Инструменты
+							<button type="button" class="nav-link header-text nav-main-drop" data-bs-toggle="dropdown" aria-expanded="false">
+								<span data-i18n="header.tools">Инструменты</span>
 							</button>
 
 							<ul class="dropdown-menu">	
-								<li><a id="split-item" class="dropdown-item" href="#">Разделить</a></li>				
-								<li><a id="dublicate-item" class="dropdown-item" href="#">Дублировать</a></li>		
-								<li><a id="remove-item" class="dropdown-item" href="#">Удалить</a></li>
+								<li><a id="split-item" class="dropdown-item" href="#" data-i18n="toolbar.split">Разделить</a></li>				
+								<li><a id="dublicate-item" class="dropdown-item" href="#" data-i18n="toolbar.duplicate">Дублировать</a></li>		
+								<li><a id="remove-item" class="dropdown-item" href="#" data-i18n="toolbar.remove">Удалить</a></li>
 							</ul>
-
 						</div>
-					</li>
 
-					<li class="nav-item-text"><a href="#" class="nav-link export">Экспортировать</a></li>
-
-				</ul>
-			</nav>
-				
-			<div class="col-sm d-flex flex-row-reverse mx-2 navbar navbar-expand-md sticky-top ">
-				<p class="badge bg-danger mx-1">DYNASTY</p>
-				<p class="my-auto">RED</p>
+						<a href="#" class="nav-link header-help" id="header-help-link" data-i18n="header.help">Справка</a>
+						<a href="#" class="nav-link export header-export-link" data-i18n="header.export">Экспортировать</a>
+					</div>
+				</div>
 			</div>
-
 		</header>
 
 		<hr class="m-0 border-1 border-top">
-			<div class="container mt-4">	
+			<div class="container mt-4" id="editor-top">	
 
 				<div class="main justify-content-md-center ">
 					<div class="main-files files-background rounded" id="loadFiles">
 
 						<div class="m-3">
-							<p class="mx-2 mt-2">Файлы проекта</p>
-								<input id="selectFile" type="file" style="display: none" />
+							<p class="mx-2 mt-2" data-i18n="files.title">Файлы проекта</p>
+								<input id="selectFile" type="file" multiple style="display: none" />
 								<div id="files-users-click" class="files-users"></div>
 						</div>
 
@@ -117,48 +176,49 @@
 				<div class="main justify-content-md-center files-background	mt-2 pt-2 px-2 rounded">
 					<div class="toolbar-main">
 						<div class="tollbar" id="tollbar ">
+							<div class="timeline-time-display rounded" id="timeline-time-display" aria-live="polite">00:00:00</div>
 
 							<!--Slipt episode into two parts in place of playhead-->
-							<button class="toolbar-button rounded" title="Разрезать эпизод">
+							<button class="toolbar-button rounded" title="Разрезать эпизод" data-i18n-attr="title:toolbar.splitTitle">
 								<i id="split" class="material-symbols-outlined">cut</i>
 							</button>
 
 							<!--Add dublicate of episode-->
-							<button class="toolbar-button rounded" title="Дублировать эпизод">
+							<button class="toolbar-button rounded" title="Дублировать эпизод" data-i18n-attr="title:toolbar.duplicateTitle">
 								<i id="dublicate" class="material-symbols-outlined">difference</i>
 							</button>
 
 							<!--Remove episode from timeline-->
-							<button class="toolbar-button rounded" title="Удалить эпизод">
+							<button class="toolbar-button rounded" title="Удалить эпизод" data-i18n-attr="title:toolbar.removeTitle">
 								<i id="remove" class="material-symbols-outlined">delete</i>
 							</button>
 
 							<i class="material-symbols-outlined">more_vert</i>	<!--delimiter-->
 
 							<!--Set marker on start position-->
-							<button class="toolbar-button rounded" title="Вернуться в начало">
+							<button class="toolbar-button rounded" title="Вернуться в начало" data-i18n-attr="title:toolbar.toStartTitle">
 								<i id="start" class="material-symbols-outlined">arrow_circle_left</i>
 							</button>
 
 							<!--Play(Pause)-->
-							<button class="toolbar-button rounded" title="Проигрывать">
+							<button class="toolbar-button rounded" title="Проигрывать" data-i18n-attr="title:toolbar.playTitle">
 								<i id="play" class="material-symbols-outlined">play_circle</i>	<!--pause_circle-->
 							</button>
 
 							<!--Stop-->
-							<button class="toolbar-button rounded" title="Остановить">
+							<button class="toolbar-button rounded" title="Остановить" data-i18n-attr="title:toolbar.stopTitle">
 								<i id="stop" class="material-symbols-outlined">stop_circle</i>
 							</button>
 
 							<i class="material-symbols-outlined">more_vert</i>	<!--delimiter-->
 							
 							<!--Zoom in timeline-->
-							<button class="toolbar-button rounded" title="Приблизить">
+							<button class="toolbar-button rounded" title="Приблизить" data-i18n-attr="title:toolbar.zoomInTitle">
 								<i id="zoom-in" class="material-symbols-outlined">zoom_in</i>
 							</button>
 							
 							<!--Zoom out timeline-->
-							<button class="toolbar-button rounded" title="Отдалить">
+							<button class="toolbar-button rounded" title="Отдалить" data-i18n-attr="title:toolbar.zoomOutTitle">
 								<i id="zoom-out" class="material-symbols-outlined">zoom_out</i>
 							</button>
 
@@ -176,23 +236,193 @@
 
 		</div>
 
+		<section class="info-section faq-section mx-2 mt-4 rounded" id="faq">
+			<div class="info-section__header">
+				<p class="info-section__eyebrow">FAQ</p>
+				<h2 class="info-section__title" data-i18n="faq.title">Частые вопросы</h2>
+				<p class="info-section__lead" data-i18n="faq.lead">Собрали короткие и понятные ответы, чтобы сориентироваться в редакторе быстрее.</p>
+			</div>
+
+			<div class="accordion faq-accordion" id="faq-accordion">
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-1">
+						<button class="accordion-button faq-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-1" aria-expanded="true" aria-controls="faq-collapse-1">
+							<span data-i18n="faq.q1.q">Что умеет viGu?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-1" class="accordion-collapse collapse show" aria-labelledby="faq-heading-1" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n="faq.q1.a">viGu помогает быстро собрать ролик в браузере: загрузить видео или изображения, расположить их на таймлайне, обрезать фрагменты, дублировать клипы и экспортировать результат в нужном качестве.</div>
+					</div>
+				</div>
+
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-2">
+						<button class="accordion-button faq-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-2" aria-expanded="false" aria-controls="faq-collapse-2">
+							<span data-i18n="faq.q2.q">Почему обработка может идти медленно?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-2" class="accordion-collapse collapse" aria-labelledby="faq-heading-2" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n="faq.q2.a">Экспорт выполняется прямо в браузере через FFmpeg WebAssembly. Чем выше разрешение, FPS и сложнее HDR-обработка, тем дольше идёт рендер. Для ускорения обычно помогает выбрать меньшее качество, 24-30 FPS или быстрый HDR-режим.</div>
+					</div>
+				</div>
+
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-3">
+						<button class="accordion-button faq-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-3" aria-expanded="false" aria-controls="faq-collapse-3">
+							<span data-i18n="faq.q3.q">Какой режим HDR лучше выбрать?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-3" class="accordion-collapse collapse" aria-labelledby="faq-heading-3" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n="faq.q3.a">Медленный режим лучше сохраняет цвет и плавнее переводит HDR в SDR. Быстрый режим подходит, когда важнее время рендера. Если нужен баланс, сначала попробуй быстрый, а для финальной версии переключись на медленный.</div>
+					</div>
+				</div>
+
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-4">
+						<button class="accordion-button faq-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-4" aria-expanded="false" aria-controls="faq-collapse-4">
+							<span data-i18n="faq.q4.q">Как выбрать качество экспорта?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-4" class="accordion-collapse collapse" aria-labelledby="faq-heading-4" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n="faq.q4.a">Если ролик нужен для мессенджеров и быстрых черновиков, подойдут 480p или 720p. Для социальных сетей и стандартного просмотра чаще всего хватает 1080p. 4K стоит выбирать только когда исходники действительно высокого качества и важна максимальная детализация.</div>
+					</div>
+				</div>
+
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-5">
+						<button class="accordion-button faq-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-5" aria-expanded="false" aria-controls="faq-collapse-5">
+							<span data-i18n="faq.q5.q">Какие FPS лучше использовать?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-5" class="accordion-collapse collapse" aria-labelledby="faq-heading-5" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n="faq.q5.a">30 FPS — универсальный вариант по умолчанию. 24 или 25 FPS подойдут, если хочешь уменьшить размер файла и ускорить экспорт. 60 FPS имеет смысл для очень плавного движения, но он ощутимо увеличивает нагрузку на рендер.</div>
+					</div>
+				</div>
+
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-6">
+						<button class="accordion-button faq-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-6" aria-expanded="false" aria-controls="faq-collapse-6">
+							<span data-i18n="faq.q6.q">Что делать, если видео выглядит бледно или слишком ярко?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-6" class="accordion-collapse collapse" aria-labelledby="faq-heading-6" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n="faq.q6.a">Чаще всего это связано с HDR-материалом. Попробуй поменять режим HDR в окне экспорта. Если изображение выглядит слишком ярким, включи медленный режим. Если нужен более быстрый результат, выбирай быстрый режим и проверь итоговый файл перед публикацией.</div>
+					</div>
+				</div>
+
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-7">
+						<button class="accordion-button faq-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-7" aria-expanded="false" aria-controls="faq-collapse-7">
+							<span data-i18n="faq.q7.q">С чего начать работу в редакторе?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-7" class="accordion-collapse collapse" aria-labelledby="faq-heading-7" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n="faq.q7.a">Сначала загрузи файлы проекта, затем перетащи их на таймлайн. После этого можно обрезать лишнее, переставить клипы по времени и запустить экспорт. Если хочется просто быстро попробовать, загрузи один файл и сразу нажми «Экспортировать».</div>
+					</div>
+				</div>
+
+				<div class="accordion-item faq-item">
+					<h3 class="accordion-header" id="faq-heading-8">
+						<button class="accordion-button faq-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-8" aria-expanded="false" aria-controls="faq-collapse-8">
+							<span data-i18n="faq.q8.q">Как предложить новую функцию или сообщить об ошибке?</span>
+						</button>
+					</h3>
+					<div id="faq-collapse-8" class="accordion-collapse collapse" aria-labelledby="faq-heading-8" data-bs-parent="#faq-accordion">
+						<div class="accordion-body faq-answer" data-i18n-html="faq.q8.a">Если хочешь предложить новую функцию или сообщить об ошибке, создай Discussion в GitHub проекта: <a class="modal-link" href="https://github.com/ArtemLapys/SkoolHack/discussions" target="_blank" rel="noopener noreferrer">github.com/ArtemLapys/SkoolHack/discussions</a>. Лучше коротко описать идею или проблему, приложить шаги воспроизведения и, если возможно, скриншот или лог.</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<footer class="page-footer mx-2 mt-4 mb-4 rounded" id="page-footer">
+			<div class="page-footer__content">
+				<div class="page-footer__meta">
+					<p class="page-footer__text" data-i18n="footer.text">viGu Видеоредактор — веб-инструмент для монтажа, экспорта и работы с HDR-видео.</p>
+					<p class="page-footer__update" data-i18n="footer.update">Последнее обновление: 2026</p>
+				</div>
+
+				<div class="page-footer__founders">
+					<button type="button" class="founders-brand" data-bs-toggle="modal" data-bs-target="#modal-founders">
+						<span>RED</span>
+						<span class="badge bg-danger">DYNASTY</span>
+					</button>
+					<p class="page-footer__hint" data-i18n="footer.hint">Нажми на логотип, чтобы открыть страницу команды, GitHub проекта и список создателей сервиса.</p>
+				</div>
+			</div>
+		</footer>
+
 	</div>
 
 	<!-- Экспорт проекта -->
+	<div class="modal" id="modal-export-settings" tabindex="-1" aria-modal="false">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" data-i18n="exportSettings.title">Параметры экспорта</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:common.close"></button>
+				</div>
+
+				<div class="modal-body">
+					<div class="mb-3">
+						<label class="form-label" for="export-quality" data-i18n="exportSettings.quality">Качество</label>
+						<select class="form-select" id="export-quality">
+							<option value="256">144p</option>
+							<option value="426">240p</option>
+							<option value="640">360p</option>
+							<option value="854">480p</option>
+							<option value="1280">720p</option>
+							<option value="1920" selected>1080p</option>
+							<option value="2560">1440p</option>
+							<option value="3840">4K</option>
+						</select>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label" for="export-fps" data-i18n="exportSettings.fps">FPS</label>
+						<select class="form-select" id="export-fps">
+							<option value="15">15</option>
+							<option value="24">24</option>
+							<option value="25">25</option>
+							<option value="30" selected>30</option>
+							<option value="60">60</option>
+						</select>
+					</div>
+
+					<div>
+						<label class="form-label" for="export-hdr-mode" data-i18n="exportSettings.hdr">Обработка HDR</label>
+						<select class="form-select" id="export-hdr-mode">
+							<option value="slow" selected data-i18n="exportSettings.hdrSlow">Медленный</option>
+							<option value="fast" data-i18n="exportSettings.hdrFast">Быстрый</option>
+						</select>
+						<div class="form-text text-light opacity-75 mt-2" data-i18n="exportSettings.hdrHint">
+							Медленный режим точнее сохраняет цвет HDR, быстрый рендерит заметно быстрее, но может быть менее точным по цвету.
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer row">
+					<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Отмена</button>
+					<button type="button" class="col-sm mx-2 btn btn-primary" id="btn-start-export" data-i18n="header.export">Экспортировать</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="modal" id="modal-export-video" tabindex="-1" aria-modal="false" data-bs-backdrop="static">
 		<div class="modal-dialog modal-dialog-centered ">
 
 			<div class="modal-content">
 
 				<div class="modal-header">
-					<h5 class="modal-title">Экспортирование видео</h5>
+					<h5 class="modal-title" data-i18n="exportProgress.title">Экспортирование видео</h5>
 				</div>
 	
 				<div class="modal-body">
-					<div class="progress ">
-						<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75"
-							aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+					<div class="progress">
+						<div id="export-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+							aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
 					</div>
+					<div class="mt-2 text-center text-white"><span id="export-progress-text">0%</span></div>
 				</div>
 				
 				
@@ -208,18 +438,18 @@
 			<div class="modal-content">
 
 				<div class="modal-header">
-					<h5 class="modal-title">Создание нового проекта</h5>
-					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+					<h5 class="modal-title" data-i18n="newProject.title">Создание нового проекта</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:common.close"></button>
 				</div>
 
 				<div class="modal-body">
-					<p>Текущие файлы и дорожки в рабочей области будут удалены.</p>
-					<p>Вы действительно хотите создать новый проект?</p>
+					<p data-i18n="newProject.text1">Текущие файлы и дорожки в рабочей области будут удалены.</p>
+					<p data-i18n="newProject.text2">Вы действительно хотите создать новый проект?</p>
 				</div> 
 
 				<div class="modal-footer  row">
-					<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-					<button type="button" class="col-sm mx-2 btn btn-primary" id="btn-in-modal-new-project">Создать</button>
+					<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Отмена</button>
+					<button type="button" class="col-sm mx-2 btn btn-primary" id="btn-in-modal-new-project" data-i18n="newProject.confirm">Создать</button>
 				</div>
 
 			</div>
@@ -234,17 +464,17 @@
 			<div class="modal-content">
 
 				<div class="modal-header">
-					<h5 class="modal-title">Удаление файла</h5>
-					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+					<h5 class="modal-title" data-i18n="deleteFile.title">Удаление файла</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:common.close"></button>
 				</div>
 
 				<div class="modal-body">
-					<p>Вы действительно хотите удалить файл <b><span id="modal-body-span" class="text-break"></span></b> ?</p>
+					<p data-i18n-html="deleteFile.body">Вы действительно хотите удалить файл <b><span id="modal-body-span" class="text-break"></span></b> ?</p>
 				</div> 
 
 				<div class="modal-footer  row">
-					<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-					<button type="button" class="col-sm mx-2 btn btn-danger" id="delete-file">Удалить</button>
+					<button type="button" class="col-sm mx-2 btn btn-secondary" data-bs-dismiss="modal" data-i18n="common.cancel">Отмена</button>
+					<button type="button" class="col-sm mx-2 btn btn-danger" id="delete-file" data-i18n="toolbar.remove">Удалить</button>
 				</div>
 
 			</div>
@@ -259,26 +489,54 @@
 			<div class="modal-content">
 			
 				<div class="modal-header">
-					<h5 class="modal-title">Справка</h5>
-					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+					<h5 class="modal-title" data-i18n="help.title">Справка</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:common.close"></button>
 				</div>
 				
 				<div class="modal-body">
-					<p class="mb-2"><kbd>Пробел</kbd> - Включить/остановить воспроизведение</p>
-					<p class="mb-2"><kbd>←</kbd> <kbd class="my-2">→</kbd> - Шаг влево/вправо в рабочей области</p>
-					<p class="mb-2"><kbd>+</kbd> <kbd class="my-2">-</kbd> - Увеличить/уменьшить рабочую область</p>
-					<p class="mb-2"><kbd>Delete</kbd> - Удалить эпизод</p>
-					<p class="mb-2"><kbd>C</kbd> - Разделить эпизод</p>
-					<p class="mb-2"><kbd>V</kbd> - Дублировать эпизод</p>
+					<p class="mb-2" data-i18n-html="help.item1"><kbd>Пробел</kbd> - Включить/остановить воспроизведение</p>
+					<p class="mb-2" data-i18n-html="help.item2"><kbd>←</kbd> <kbd class="my-2">→</kbd> - Шаг влево/вправо в рабочей области</p>
+					<p class="mb-2" data-i18n-html="help.item3"><kbd>+</kbd> <kbd class="my-2">-</kbd> - Увеличить/уменьшить рабочую область</p>
+					<p class="mb-2" data-i18n-html="help.item4"><kbd>Delete</kbd> - Удалить эпизод</p>
+					<p class="mb-2" data-i18n-html="help.item5"><kbd>C</kbd> - Разделить эпизод</p>
+					<p class="mb-2" data-i18n-html="help.item6"><kbd>V</kbd> - Дублировать эпизод</p>
+					<p class="mb-2" data-i18n="help.item7">Выбор качества, FPS и HDR-режима доступен прямо перед экспортом.</p>
+					<p class="mb-2" data-i18n="help.item8">Для тяжёлых HDR-роликов лучше начать с 720p или 1080p, чтобы быстрее проверить итоговый цвет.</p>
 					<p class="mb-2"><kbd>ヾ(＾-＾)ノ</kbd> - Have fun! You the best! ❤</p>
 				</div>
 
 				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" id="close-reference-panel">Закрыть</button>
+					<button type="button" class="btn btn-primary" id="close-reference-panel" data-i18n="common.close">Закрыть</button>
 				</div>
 			
 			</div>
 
+		</div>
+	</div>
+
+	<div class="modal" id="modal-founders" tabindex="-1" aria-modal="false">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">RED Dynasty</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть" data-i18n-attr="aria-label:common.close"></button>
+				</div>
+
+				<div class="modal-body">
+					<p class="mb-3" data-i18n-html="founders.github">GitHub сервиса: <a class="modal-link" href="https://github.com/ArtemLapys/SkoolHack" target="_blank" rel="noopener noreferrer">github.com/ArtemLapys/SkoolHack</a></p>
+					<p class="mb-2" data-i18n="founders.creators">Создатели сервиса:</p>
+					<p class="mb-2">ArtemLapys</p>
+					<p class="mb-2">TedCraft</p>
+					<p class="mb-2">MeToDucT</p>
+					<p class="mb-3">AIR_RU</p>
+					<p class="mb-2" data-i18n="founders.madeWithLove">Создавали с любовью на хакатоне.</p>
+					<p class="mb-0" data-i18n="founders.updated">Последнее обновление: 2026</p>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-i18n="common.close">Закрыть</button>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -292,6 +550,7 @@
 		integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz"
 		crossorigin="anonymous"></script>
 
+	<script src="js/i18n.js"></script>
 	<script src="js/libs/dom.js"></script>
 	<script src="js/libs/easing-editor.js"></script>
 	<script src="js/libs/easingFunctions.js"></script>
@@ -303,8 +562,10 @@
 	<script src="js/codeAddVideo.js"></script>
 	<script src="js/layers.js"></script>
 	<script src="js/timeline.js"></script>
+	<script src="js/dragDropTimeline.js"></script>
 	<script src="js/toolbar.js"></script>
 	<script src="js/menubar.js"></script>
+	<script src="ffmpeg/ffmpeg.js"></script>
 	<script src="js/export.js"></script>
 	<script src="js/main.js"></script>
 

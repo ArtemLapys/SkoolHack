@@ -26,6 +26,11 @@
 	animation: 2s spin infinite linear;
 }
 
+.preload-badge {
+	background: linear-gradient(135deg, #1f86ff, #0d6efd);
+	color: #fff;
+}
+
 @keyframes spin{
 	from{
 		transform: translate(-50%, -50%) scale(1.2);
