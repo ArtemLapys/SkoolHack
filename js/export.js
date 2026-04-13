@@ -251,6 +251,19 @@ function getTrimmedDuration(track) {
     return 5;
 }
 
+function shouldLoopTrackForExport(track) {
+    if (isImageTrack(track)) return false;
+
+    const sourceLength = getTrackSourceLength(track);
+    const trimStart = getTrackTrimStart(track);
+    const duration = getTrimmedDuration(track);
+
+    if (!(sourceLength > 0) || !(duration > 0)) return false;
+
+    const remainingUntilLoop = Math.max(sourceLength - trimStart, 0);
+    return duration > remainingUntilLoop + 0.001;
+}
+
 function getTrackEnd(track) {
     return getTrackStart(track) + getTrimmedDuration(track);
 }
@@ -907,6 +920,7 @@ async function prepareTrackClip({ track, trackIndex, w, h, fps }) {
 
     const duration = getTrimmedDuration(track);
     const trimStart = getTrackTrimStart(track);
+    const shouldLoopSource = shouldLoopTrackForExport(track);
 
     console.log('EXPORT TRACK SOURCE:', track);
 
@@ -938,9 +952,10 @@ async function prepareTrackClip({ track, trackIndex, w, h, fps }) {
                 outName
             ], t('export.prepareClipError', { index: trackIndex + 1 }, `Не удалось подготовить клип ${trackIndex + 1}.`), `Prepare clip ${trackIndex + 1}`);
         } else {
-            await execOrThrow([
-                '-ss', `${trimStart}`,
+            const mediaArgs = [
+                ...(shouldLoopSource ? ['-stream_loop', '-1'] : []),
                 '-i', srcName,
+                '-ss', `${trimStart}`,
                 '-t', `${duration}`,
                 '-map', '0:v:0',
                 '-map', '0:a:0?',
@@ -951,7 +966,21 @@ async function prepareTrackClip({ track, trackIndex, w, h, fps }) {
                 ...audioParams,
                 '-shortest',
                 outName
-            ], t('export.prepareClipError', { index: trackIndex + 1 }, `Не удалось подготовить клип ${trackIndex + 1}.`), `Prepare clip ${trackIndex + 1}`);
+            ];
+
+            logExportStep('Prepare clip source mode', {
+                trackIndex,
+                duration,
+                trimStart,
+                sourceLength: getTrackSourceLength(track),
+                shouldLoopSource
+            });
+
+            await execOrThrow(
+                mediaArgs,
+                t('export.prepareClipError', { index: trackIndex + 1 }, `Не удалось подготовить клип ${trackIndex + 1}.`),
+                `Prepare clip ${trackIndex + 1}`
+            );
         }
     };
 
