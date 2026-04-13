@@ -4,6 +4,7 @@ let ffmpegLoaded = false;
 let ffmpegListenersBound = false;
 let ffmpegRecentLogs = [];
 let ffmpegTerminatedByTimeout = false;
+let ffmpegLastActivityAt = 0;
 
 function t(key, vars = {}, fallback = '') {
     return globalThis.i18n?.t?.(key, vars, fallback || key) || fallback || key;
@@ -21,21 +22,6 @@ function createTimeoutError(message) {
     const error = new Error(message);
     error.code = 'EXPORT_TIMEOUT';
     return error;
-}
-
-function withTimeout(promise, timeoutMs, message) {
-    let timerId;
-
-    const timeoutPromise = new Promise((_, reject) => {
-        timerId = setTimeout(() => {
-            reject(createTimeoutError(message));
-        }, timeoutMs);
-    });
-
-    return Promise.race([
-        promise.finally(() => clearTimeout(timerId)),
-        timeoutPromise
-    ]);
 }
 
 function sleep(ms) {
@@ -66,7 +52,7 @@ const EXPORT_CONFIG = {
     outputFileName: 'final-vigu.mp4',
     hdrMode: 'slow',
     ffmpegExecTimeoutMs: 180000,
-    finalAssemblyTimeoutMs: 300000
+    finalAssemblyInactivityTimeoutMs: 180000
 };
 
 const EXPORT_QUALITY_OPTIONS = [
@@ -143,6 +129,7 @@ function bindFfmpegListeners(progressBar, progressText) {
     if (ffmpegListenersBound) return;
 
     ffmpeg.on('log', ({ message }) => {
+        ffmpegLastActivityAt = Date.now();
         ffmpegRecentLogs.push(String(message || ''));
         if (ffmpegRecentLogs.length > 100) {
             ffmpegRecentLogs = ffmpegRecentLogs.slice(-100);
@@ -151,6 +138,7 @@ function bindFfmpegListeners(progressBar, progressText) {
     });
 
     ffmpeg.on('progress', ({ progress }) => {
+        ffmpegLastActivityAt = Date.now();
         const localPct = Math.max(0, Math.min(100, Math.round(progress * 100)));
         const span = exportProgressState.endPct - exportProgressState.startPct;
         const globalPct = exportProgressState.startPct + span * (localPct / 100);
@@ -168,6 +156,7 @@ function bindFfmpegListeners(progressBar, progressText) {
 
 function resetRecentFfmpegLogs() {
     ffmpegRecentLogs = [];
+    ffmpegLastActivityAt = Date.now();
 }
 
 function hasRecentFfmpegLog(pattern) {
@@ -492,22 +481,30 @@ async function execOrThrow(args, errorMessage, logLabel = 'FFmpeg operation') {
         operation: logLabel,
         args
     });
-    const timeoutMs = logLabel.includes('Assemble final video')
-        ? EXPORT_CONFIG.finalAssemblyTimeoutMs
+    const isFinalAssembly = logLabel.includes('Assemble final video');
+    const timeoutMs = isFinalAssembly
+        ? -1
+        : EXPORT_CONFIG.ffmpegExecTimeoutMs;
+    const inactivityTimeoutMs = isFinalAssembly
+        ? EXPORT_CONFIG.finalAssemblyInactivityTimeoutMs
         : EXPORT_CONFIG.ffmpegExecTimeoutMs;
     let exitCode;
+    let stalled = false;
+    let stallWatcherStopped = false;
 
-    try {
-        exitCode = await withTimeout(
-            ffmpeg.exec(args, timeoutMs),
-            timeoutMs + 1000,
-            `${logLabel} timed out after ${timeoutMs}ms`
-        );
-    } catch (error) {
-        if (error?.code === 'EXPORT_TIMEOUT') {
-            logExportStep('FFmpeg exec timeout', {
+    ffmpegLastActivityAt = Date.now();
+
+    const stallWatcher = (async () => {
+        while (!stallWatcherStopped) {
+            await sleep(1000);
+            if (stallWatcherStopped) break;
+            if (Date.now() - ffmpegLastActivityAt <= inactivityTimeoutMs) continue;
+
+            stalled = true;
+            logExportStep('FFmpeg inactivity timeout', {
                 operation: logLabel,
-                timeoutMs
+                inactivityTimeoutMs,
+                lastActivityAt: ffmpegLastActivityAt
             });
 
             try {
@@ -516,16 +513,36 @@ async function execOrThrow(args, errorMessage, logLabel = 'FFmpeg operation') {
 
             ffmpegLoaded = false;
             ffmpegTerminatedByTimeout = true;
-            throw new Error(`${errorMessage} Операция "${logLabel}" зависла дольше ${Math.round(timeoutMs / 1000)} сек.`);
+            break;
+        }
+    })();
+
+    try {
+        exitCode = await ffmpeg.exec(args, timeoutMs);
+    } catch (error) {
+        if (stalled || error?.code === 'EXPORT_TIMEOUT') {
+            const failTimeoutMs = stalled ? inactivityTimeoutMs : timeoutMs;
+            throw createTimeoutError(
+                `${errorMessage} Операция "${logLabel}" не подавала признаков активности дольше ${Math.round(failTimeoutMs / 1000)} сек.`
+            );
         }
 
         throw error;
+    } finally {
+        stallWatcherStopped = true;
+        await stallWatcher;
     }
 
     logExportStep('FFmpeg exec end', {
         operation: logLabel,
         exitCode
     });
+
+    if (stalled) {
+        throw createTimeoutError(
+            `${errorMessage} Операция "${logLabel}" не подавала признаков активности дольше ${Math.round(inactivityTimeoutMs / 1000)} сек.`
+        );
+    }
 
     if (exitCode !== 0) {
         throw new Error(`${errorMessage} Код FFmpeg: ${exitCode}.`);
@@ -1183,7 +1200,7 @@ async function assembleWithPreparedOverlay({ progressBar, progressText, prepared
         resolution: `${w}x${h}`,
         fps
     });
-    setExportStage(progressBar, progressText, 95, 99, 'Сборка наложения', 95);
+    setExportStage(progressBar, progressText, 95, 99, t('export.overlayAssembly', {}, 'Склеивание наложений'), 95);
 
     const videoComplex = buildTimelineFilterComplex(preparedTracks, 0, 2);
     const audioComplex = buildAudioMixFilterComplex(preparedTracks);
@@ -1371,10 +1388,9 @@ document.querySelectorAll('.export').forEach(element => {
                 return;
             }
 
-            setExportStage(progressBar, progressText, 95, 99, t('export.finalizing', {}, 'Финализация'), 95);
-
             if (canUseConcatAssembly(preparedTracks)) {
                 logExportStep('Final assembly mode', { mode: 'concat' });
+                setExportStage(progressBar, progressText, 95, 99, t('export.concatAssembly', {}, 'Склеивание клипов'), 95);
                 await assembleWithConcat({
                     preparedTracks,
                     projectDuration,
