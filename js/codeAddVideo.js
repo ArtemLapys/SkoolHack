@@ -1,6 +1,34 @@
 var __blob = [];
 addButtonPanel("add");
 
+function appendFilesToProject(files, addButtonEl = null) {
+  const fileList = Array.from(files || []).filter(Boolean);
+  if (!fileList.length) return;
+
+  const filesBlock = document.getElementById("files-users-click");
+  if (!filesBlock) return;
+
+  fileList.forEach(file => {
+    const uploadId = generateUploadId();
+    let addLabel = addButtonEl;
+
+    if (!addLabel || !addLabel.classList || !addLabel.classList.contains('files-add')) {
+      addLabel = document.querySelector('label.files-add') || filesBlock.querySelector('label.files-add');
+    }
+
+    if (!addLabel) addLabel = addButtonPanel("add");
+
+    addButtonNormal(addLabel, file.name, uploadId);
+    addButtonPanel("add");
+
+    try {
+      __blob.push(new (toSource(file.type))(file, uploadId));
+    } catch (err) {
+      console.error('Не удалось создать Source для файла', err);
+    }
+  });
+}
+
 document.addEventListener('click', (e) => {
   const target = e.target;
   if (target.closest && target.closest('.files-users')) return;
@@ -27,6 +55,7 @@ if (filesUsers) {
       const __addFileInput = document.getElementById("selectFile") || (() => {
         const inp = document.createElement('input');
         inp.type = 'file';
+        inp.multiple = true;
         inp.id = 'selectFile';
         inp.style.display = 'none';
         document.body.appendChild(inp);
@@ -35,17 +64,9 @@ if (filesUsers) {
 
       __addFileInput.onchange = function (ev) {
         if (!__addFileInput.files || __addFileInput.files.length === 0) return;
-        const file = __addFileInput.files[0];
         const addText = addButtonEl.innerText || (addButtonEl.querySelector && (addButtonEl.querySelector('i')?.innerText || addButtonEl.querySelector('span')?.innerText));
         if (addText && addText.toString().trim() === "add") {
-          const uploadId = generateUploadId();
-          addButtonNormal(addButtonEl, file.name, uploadId);
-          addButtonPanel("add");
-          try {
-            __blob.push(new (toSource(file.type))(file, uploadId));
-          } catch (err) {
-            console.error('Не удалось создать Source для файла', err);
-          }
+          appendFilesToProject(__addFileInput.files, addButtonEl);
         }
         __addFileInput.value = '';
       };
@@ -74,6 +95,7 @@ document.getElementById('contextMenuFile')?.addEventListener('hidden.bs.dropdown
     const __addFileInput = document.getElementById("selectFile") || (() => {
       const inp = document.createElement('input');
       inp.type = 'file';
+      inp.multiple = true;
       inp.id = 'selectFile';
       inp.style.display = 'none';
       document.body.appendChild(inp);
@@ -82,19 +104,7 @@ document.getElementById('contextMenuFile')?.addEventListener('hidden.bs.dropdown
 
     __addFileInput.onchange = function (ev) {
       if (!__addFileInput.files || __addFileInput.files.length === 0) return;
-      const file = __addFileInput.files[0];
-      let _blockKeyFiles = document.getElementById("files-users-click");
-      if (!_blockKeyFiles) return;
-      let addLabel = document.querySelector('label.files-add') || _blockKeyFiles.querySelector('label.files-add');
-      const uploadId = generateUploadId();
-      if (!addLabel) addLabel = addButtonPanel('add');
-      addButtonNormal(addLabel, file.name, uploadId);
-      addButtonPanel("add");
-      try {
-        __blob.push(new (toSource(file.type))(file, uploadId));
-      } catch (err) {
-        console.error('Не удалось создать Source для файла', err);
-      }
+      appendFilesToProject(__addFileInput.files);
       __addFileInput.value = '';
     };
     __addFileInput.click();
@@ -109,19 +119,7 @@ if (loadFilesEl) {
     document.body.style.cursor = "auto";
     e.preventDefault();
     if (!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
-    const file = e.dataTransfer.files[0];
-    let _blockKeyFiles = document.getElementById("files-users-click");
-    if (!_blockKeyFiles) return;
-    let addLabel = document.querySelector('label.files-add') || _blockKeyFiles.querySelector('label.files-add');
-    const uploadId = generateUploadId();
-    if (!addLabel) addLabel = addButtonPanel('add');
-    addButtonNormal(addLabel, file.name, uploadId);
-    addButtonPanel("add");
-    try {
-      __blob.push(new (toSource(file.type))(file, uploadId));
-    } catch (err) {
-      console.error('Не удалось создать Source для файла', err);
-    }
+    appendFilesToProject(e.dataTransfer.files);
   });
 }
 
@@ -218,7 +216,14 @@ function removeButtonPanel(buttonId) {
 	for (let i = 0; i < _elemChild.length; i++) {
 		if (_elemChild[i].id == buttonId) {
 			if (_elemChild[i].innerText != "add") {
-                document.getElementById("modal-body-span").innerText = __blob[_elemChild[i].id].name;
+                const sourceId = _elemChild[i].dataset.sourceBound || _elemChild[i].dataset.uploadId;
+                const sourceIndex = sourceId
+                    ? __blob.findIndex(item => item && (item.id === sourceId || item.id === _elemChild[i].dataset.sourceBound))
+                    : Number(_elemChild[i].id);
+                const sourceItem = __blob[sourceIndex];
+                if (!sourceItem) return;
+
+                document.getElementById("modal-body-span").innerText = sourceItem.name;
 				let windowSucess = new bootstrap.Modal(_modalWindow, {
 					keyboard: true,
 					focus: true
@@ -230,8 +235,8 @@ function removeButtonPanel(buttonId) {
                         while (__isNotExit) {
                             let __isRemoved = false;
                             for(let __i = 0; __i < layer.tracks.length; __i++) {
-                                if (layer.tracks[__i].source.url == __blob[_elemChild[i].id].url
-                                && layer.tracks[__i].source.id == __blob[_elemChild[i].id].id) {
+                                if (layer.tracks[__i].source.url == sourceItem.url
+                                && layer.tracks[__i].source.id == sourceItem.id) {
                                     layer.tracks[__i].remove('delete');
                                     __isRemoved = true;
                                     if (!layer.tracks.length) { // удалять пустые дорожки
@@ -245,7 +250,7 @@ function removeButtonPanel(buttonId) {
                             }
                         }
                     });
-                    __blob.splice(_elemChild[i].id, 1);
+                    __blob.splice(sourceIndex, 1);
                     try { _blockKeyFiles.removeChild(_elemChild[i]); } catch(e){}
                     for (let __i = 0; __i < _elemChild.length; __i++) {
                         if (_elemChild[__i].id != __i) {

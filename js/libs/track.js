@@ -822,8 +822,31 @@ class Track {
   
     prepare(relTime) {
       return new Promise(res => {
-        this.media.addEventListener('timeupdate', res, {once: true});
-        this.media.currentTime = mod(relTime + this.trimStart, this.source.length);
+        const sourceLength = Number(this.source?.length);
+        const safeSourceLength = Number.isFinite(sourceLength) && sourceLength > 0 ? sourceLength : 5;
+        const trimStart = Number.isFinite(this.trimStart) ? this.trimStart : 0;
+        const rel = Number.isFinite(relTime) ? relTime : 0;
+        const targetTime = mod(rel + trimStart, safeSourceLength);
+        const safeTargetTime = Number.isFinite(targetTime) ? targetTime : 0;
+
+        const finalize = () => res();
+
+        if (!this.media || typeof this.media.currentTime !== 'number') {
+          finalize();
+          return;
+        }
+
+        this.media.addEventListener('timeupdate', finalize, {once: true});
+        this.media.addEventListener('seeked', finalize, {once: true});
+
+        try {
+          this.media.currentTime = safeTargetTime;
+        } catch (error) {
+          try {
+            this.media.currentTime = 0;
+          } catch (innerError) {}
+          finalize();
+        }
       });
     }
   

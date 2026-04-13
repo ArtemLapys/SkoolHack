@@ -1,9 +1,15 @@
 const scrollWrapper = document.getElementById('scroll');
 const timeMarkers = document.getElementById('axis');
+const layersContainer = document.getElementById('layers');
 const playheadMarker = document.getElementById('playhead');
 const playButton = document.getElementById('play');
 const zoomInBtn = document.getElementById('zoom-in');
 const zoomOutBtn = document.getElementById('zoom-out');
+const timelineTimeDisplay = document.getElementById('timeline-time-display');
+
+function translateUi(key, fallback) {
+  return globalThis.i18n?.t?.(key, {}, fallback) || fallback;
+}
 
 const playIcon = playButton.firstChild;
 const LEFT_PADDING = 5;
@@ -18,15 +24,66 @@ window.addEventListener('resize', e => {
   windowWidth = window.innerWidth;
   windowHeight = window.innerHeight;
   renderScale();
+  syncStickyTimelineAxis();
 });
+
+function formatTimelineTime(totalSeconds = 0) {
+  const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+  const hours = String(Math.floor(safeSeconds / 3600)).padStart(2, '0');
+  const minutes = String(Math.floor((safeSeconds % 3600) / 60)).padStart(2, '0');
+  const seconds = String(safeSeconds % 60).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function updateTimelineTimeDisplay(time = 0) {
+  if (timelineTimeDisplay) {
+    timelineTimeDisplay.textContent = formatTimelineTime(time);
+  }
+}
+
+function syncStickyTimelineAxis() {
+  if (!scrollWrapper || !timeMarkers) return;
+
+  const rect = scrollWrapper.getBoundingClientRect();
+  const axisHeight = timeMarkers.offsetHeight || 34;
+  const shouldStick = rect.top <= 0 && rect.bottom - axisHeight > 0;
+  const timelineWidth = Math.max(
+    layersContainer?.scrollWidth || 0,
+    layersContainer?.offsetWidth || 0,
+    scrollWrapper.clientWidth
+  );
+
+  timeMarkers.classList.toggle('timeline-axis-fixed', shouldStick);
+
+  if (shouldStick) {
+    timeMarkers.style.top = '0';
+    timeMarkers.style.left = `${rect.left - scrollWrapper.scrollLeft}px`;
+    timeMarkers.style.width = `${timelineWidth}px`;
+    timeMarkers.style.transform = '';
+  } else {
+    timeMarkers.style.top = '';
+    timeMarkers.style.left = '';
+    timeMarkers.style.width = `${timelineWidth}px`;
+    timeMarkers.style.transform = '';
+  }
+}
 
 function renderScale() {
   while (timeMarkers.firstChild) timeMarkers.removeChild(timeMarkers.firstChild);
 
+  const viewportWidth = scrollWrapper?.clientWidth || windowWidth;
+  const bufferedViewportWidth = viewportWidth * 1.5;
   const majorStep = 20 * 2 ** (-logScale);
   const step = 2 * 2 ** (-logScale);
-  const minTime = Math.floor((scrollX - LEFT) / scale / step) * step;
-  const maxTime = Math.ceil((scrollX + windowWidth) / scale / step) * step;
+  const minVisiblePx = Math.max(scrollX - bufferedViewportWidth, 0);
+  const maxVisiblePx = scrollX + viewportWidth + bufferedViewportWidth;
+  const minTime = Math.floor(minVisiblePx / scale / step) * step;
+  const projectDuration = Math.max(Number(editorLength) || 0, previewTime || 0);
+  const projectDurationWithPadding = projectDuration + majorStep * 2;
+  const maxTime = Math.max(
+    Math.ceil(maxVisiblePx / scale / step) * step,
+    Math.ceil(projectDurationWithPadding / step) * step
+  );
 
   for (let t = Math.max(minTime, 0); t <= maxTime; t += step) {
     timeMarkers.appendChild(Elem('span', {
@@ -37,7 +94,10 @@ function renderScale() {
     }, [t % majorStep === 0 ? t + 's' : '']));
   }
 
-  document.getElementById("layers").setAttribute("style", `width: ${maxTime*scale}px;`)
+  const timelineWidth = Math.max(maxTime * scale, viewportWidth);
+  layersContainer.setAttribute("style", `width: ${timelineWidth}px;`)
+  timeMarkers.style.width = `${timelineWidth}px`;
+  syncStickyTimelineAxis();
 }
 window.requestAnimationFrame(renderScale);
 
@@ -46,13 +106,17 @@ scrollWrapper.addEventListener('scroll', e => {
   scrollX = scrollWrapper.scrollLeft;
   scrollY = scrollWrapper.scrollTop;
   renderScale();
+  syncStickyTimelineAxis();
 });
+
+window.addEventListener('scroll', syncStickyTimelineAxis, { passive: true });
 
 let previewTimeReady;
 function previewTimeAt(time = previewTime, prepare = true) {
   if (time < 0) time = 0;
   previewTime = time;
   playheadMarker.style.left = time * scale + 'px';
+  updateTimelineTimeDisplay(time);
 
   if (prepare) {
     previewTimeReady = Promise.all(layers.map(layer => {
@@ -120,6 +184,7 @@ function setPreviewTime(time, scrollTo = true) {
 
 previewTimeAt(0);
 addLayer();
+syncStickyTimelineAxis();
 
 let playing = false;
 async function play(exporting = false) {
@@ -142,7 +207,7 @@ async function play(exporting = false) {
   };
 
   playIcon.textContent = 'pause_circle';
-  playButton.title = "Приостановить";
+  playButton.title = translateUi('toolbar.pauseTitle', 'Приостановить');
   paint();
 }
 
@@ -154,7 +219,7 @@ function paint() {
   previewTimeAt((Date.now() - playing.start) / 1000 + playing.startTime, false);
   c.clearRect(0, 0, c.canvas.width, c.canvas.height);
 
-  layers.forEach(layer => {
+  [...layers].reverse().forEach(layer => {
     const track = layer.trackAt(previewTime);
     if (track) {
 
@@ -190,6 +255,14 @@ function stop() {
 
   playing = false;
   playIcon.textContent = 'play_circle';
-  playButton.title="Проигрывать";
+  playButton.title = translateUi('toolbar.playTitle', 'Проигрывать');
   window.cancelAnimationFrame(nextAnimationFrame);
 }
+
+window.addEventListener('vigu:languagechange', () => {
+  if (!playing) {
+    playButton.title = translateUi('toolbar.playTitle', 'Проигрывать');
+  } else {
+    playButton.title = translateUi('toolbar.pauseTitle', 'Приостановить');
+  }
+});

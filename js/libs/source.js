@@ -1,6 +1,5 @@
 const thumbnailCanvas = Elem('canvas');
 const thumbnailContext = thumbnailCanvas.getContext('2d');
-const thumbnailVideo = Elem('video');
 const thumbnailAudio = Elem('audio');
 const audioContext = new AudioContext();
 
@@ -59,6 +58,11 @@ class Source {
         .then(() => {
           this.elem.classList.remove('disabled');
           this.elem.style.backgroundImage = `url(${encodeURI(this.thumbnail)})`;
+          this.tracks.forEach(track => {
+            if (track?.elem) {
+              track.elem.style.backgroundImage = `url(${encodeURI(this.thumbnail)})`;
+            }
+          });
         });
     }
   
@@ -80,30 +84,111 @@ class Source {
     constructor(...args) {
       super(...args);
       this.elem.classList.add('video');
-      this.onVideoLoad = this.onVideoLoad.bind(this);
-      thumbnailVideo.addEventListener('loadedmetadata', this.onVideoLoad);
-      thumbnailVideo.src = this.url;
+      this.thumbnailVideo = Elem('video', {
+        src: this.url,
+        muted: true,
+        playsInline: true,
+        preload: 'auto'
+      });
+      this.thumbnailVideo.addEventListener('loadedmetadata', () => this.onVideoMetadata());
+      this.thumbnailVideo.addEventListener('error', () => this.failSafeReady(), { once: true });
     }
-  
-    onVideoLoad() {
-      if (thumbnailVideo.readyState < 2) return;
-      thumbnailVideo.removeEventListener('loadedmetadata', this.onVideoLoad);
-      if (thumbnailVideo.duration === Infinity) {
-        // https://victorblog.com/2018/02/14/get-video-and-audio-blob-duration-in-html5/
-        // https://stackoverflow.com/a/39971175
-        thumbnailVideo.currentTime = 1e101;
-        thumbnailVideo.addEventListener('timeupdate', this.onVideoLoad, {once: true});
-        return;
+
+    onVideoMetadata() {
+      const duration = Number(this.thumbnailVideo.duration);
+      if (Number.isFinite(duration) && duration > 0) {
+        this.length = duration;
+      } else {
+        this.length = this.length || 5;
       }
-      this.length = thumbnailVideo.duration;
-      thumbnailVideo.addEventListener('timeupdate', e => {
-        this.width = thumbnailCanvas.width = thumbnailVideo.videoWidth;
-        this.height = thumbnailCanvas.height = thumbnailVideo.videoHeight;
-        thumbnailContext.drawImage(thumbnailVideo, 0, 0, thumbnailVideo.videoWidth, thumbnailVideo.videoHeight);
-        this.thumbnail = thumbnailCanvas.toDataURL();
-        this.amReady();
-      }, {once: true});
-      thumbnailVideo.currentTime = thumbnailVideo.duration / 2;
+
+      this.requestThumbnailFrame();
+    }
+
+    requestThumbnailFrame() {
+      if (!this.thumbnailVideo || this._thumbnailCaptured || this._thumbnailRequested) return;
+      this._thumbnailRequested = true;
+
+      const duration = Number(this.thumbnailVideo.duration);
+      const targetTime = Number.isFinite(duration) && duration > 0
+        ? Math.min(Math.max(duration * 0.25, 0.15), Math.max(duration - 0.1, 0))
+        : 0;
+
+      const captureOnce = () => this.captureThumbnailFrame();
+      const fallbackTimer = setTimeout(() => {
+        this.captureThumbnailFrame();
+      }, 1200);
+
+      const cleanup = () => {
+        clearTimeout(fallbackTimer);
+        this.thumbnailVideo?.removeEventListener('seeked', onSeeked);
+        this.thumbnailVideo?.removeEventListener('loadeddata', onLoadedData);
+        this.thumbnailVideo?.removeEventListener('canplay', onCanPlay);
+      };
+
+      const onSeeked = () => {
+        cleanup();
+        captureOnce();
+      };
+
+      const onLoadedData = () => {
+        if (targetTime <= 0.001) {
+          cleanup();
+          captureOnce();
+        }
+      };
+
+      const onCanPlay = () => {
+        if (targetTime <= 0.001) {
+          cleanup();
+          captureOnce();
+        }
+      };
+
+      this.thumbnailVideo.addEventListener('seeked', onSeeked, { once: true });
+      this.thumbnailVideo.addEventListener('loadeddata', onLoadedData, { once: true });
+      this.thumbnailVideo.addEventListener('canplay', onCanPlay, { once: true });
+
+      try {
+        if (targetTime > 0.001) {
+          this.thumbnailVideo.currentTime = targetTime;
+        } else if (this.thumbnailVideo.readyState >= 2) {
+          cleanup();
+          captureOnce();
+        }
+      } catch (error) {
+        cleanup();
+        this.captureThumbnailFrame();
+      }
+    }
+
+    captureThumbnailFrame() {
+      if (!this.thumbnailVideo || this._thumbnailCaptured) return;
+
+      const videoWidth = this.thumbnailVideo.videoWidth || 320;
+      const videoHeight = this.thumbnailVideo.videoHeight || 180;
+
+      this.width = thumbnailCanvas.width = videoWidth;
+      this.height = thumbnailCanvas.height = videoHeight;
+
+      try {
+        thumbnailContext.clearRect(0, 0, videoWidth, videoHeight);
+        thumbnailContext.drawImage(this.thumbnailVideo, 0, 0, videoWidth, videoHeight);
+        this.thumbnail = thumbnailCanvas.toDataURL('image/jpeg', 0.82);
+      } catch (error) {
+        this.thumbnail = this.thumbnail || this.url;
+      }
+
+      this._thumbnailCaptured = true;
+      this.amReady();
+    }
+
+    failSafeReady() {
+      if (this._thumbnailCaptured) return;
+      this.length = this.length || 5;
+      this.thumbnail = this.thumbnail || this.url;
+      this._thumbnailCaptured = true;
+      this.amReady();
     }
   
     createTrack() {

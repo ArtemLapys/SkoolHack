@@ -198,6 +198,8 @@ async function rerender() {
   await previewTimeReady;
   c.clearRect(0, 0, c.canvas.width, c.canvas.height);
   let length = 0;
+  const renderOrderedLayers = [...layers].reverse();
+
   layers.forEach(layer => {
     if (layer.tracks.length) {
       const lastTrack = layer.tracks[layer.tracks.length - 1];
@@ -205,6 +207,9 @@ async function rerender() {
         length = lastTrack.end;
       }
     }
+  });
+
+  renderOrderedLayers.forEach(layer => {
     const track = layer.trackAt(previewTime);
     if (track) {
       track.render(c, previewTime - track.start);
@@ -212,5 +217,8 @@ async function rerender() {
     }
   });
   editorLength = length;
+  if (typeof renderScale === 'function') {
+    renderScale();
+  }
   //lengthSpan.textContent = Math.floor(length / 60) + ':' + ('0' + Math.floor(length % 60)).slice(-2);
 }

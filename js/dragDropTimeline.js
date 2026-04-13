@@ -25,7 +25,9 @@
 		prevent(e);
 		const dt = e.dataTransfer;
 		if (!dt || !dt.files || dt.files.length === 0) return;
-		const file = dt.files[0];
+		const files = Array.from(dt.files);
+
+		for (const file of files) {
 
 		// --- create/add preview in files panel (reuse addButtonNormal/addButtonPanel globals if present) ---
 		const filesContainer = document.getElementById('files-users-click');
@@ -77,14 +79,14 @@
 		try { SourceClass = toSource(file.type); } catch (err) { SourceClass = null; }
 		if (!SourceClass) {
 			console.warn('Unsupported file type for timeline drop:', file.type);
-			return;
+			continue;
 		}
 		let source;
 		try {
 			source = new (SourceClass)(file, uploadId);
 		} catch (err) {
 			console.error('Failed to create Source for dropped file', err);
-			return;
+			continue;
 		}
 		// keep global __blob consistent if exists
 		try { if (window.__blob && Array.isArray(window.__blob)) window.__blob.push(source); } catch(e){}
@@ -92,7 +94,7 @@
 		try { await source.ready; } catch(e){}
 
 		let track;
-		try { track = source.createTrack(); } catch (err) { console.error(err); return; }
+		try { track = source.createTrack(); } catch (err) { console.error(err); continue; }
 
 		 // For image tracks ensure length is present and visual updated
 		try {
@@ -433,6 +435,7 @@
 		// rerender/update UI
 		if (typeof window.rerender === 'function') try { window.rerender(); } catch(e){}
 		if (typeof window.updateLayers === 'function') try { window.updateLayers(); } catch(e){}
+		}
 	}
 
 	// Attach drop handler to both layersContainer and scrollEl (if present), and document fallback
