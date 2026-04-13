@@ -3,6 +3,73 @@ const thumbnailContext = thumbnailCanvas.getContext('2d');
 const thumbnailAudio = Elem('audio');
 const audioContext = new AudioContext();
 
+function waitForDecodedVideoFrame(video, timeout = 1000) {
+  return new Promise(resolve => {
+    if (!video) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+    let timeoutId = null;
+    let rvfcId = null;
+
+    const cleanup = () => {
+      if (settled) return;
+      settled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      video.removeEventListener('loadeddata', onReady);
+      video.removeEventListener('canplay', onReady);
+      video.removeEventListener('seeked', onReady);
+      if (rvfcId !== null && typeof video.cancelVideoFrameCallback === 'function') {
+        try { video.cancelVideoFrameCallback(rvfcId); } catch (error) {}
+      }
+      resolve();
+    };
+
+    const onReady = () => {
+      if (typeof video.requestVideoFrameCallback === 'function') {
+        try {
+          rvfcId = video.requestVideoFrameCallback(() => cleanup());
+          return;
+        } catch (error) {}
+      }
+
+      requestAnimationFrame(() => cleanup());
+    };
+
+    timeoutId = setTimeout(cleanup, timeout);
+
+    if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+      onReady();
+      return;
+    }
+
+    video.addEventListener('loadeddata', onReady, { once: true });
+    video.addEventListener('canplay', onReady, { once: true });
+    video.addEventListener('seeked', onReady, { once: true });
+  });
+}
+
+async function warmupVideoForCanvas(video) {
+  if (!video) return;
+  if (video.readyState >= 2 && video.currentTime > 0) {
+    await waitForDecodedVideoFrame(video, 350);
+    return;
+  }
+
+  try {
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      await playPromise.catch(() => {});
+    }
+  } catch (error) {}
+
+  await waitForDecodedVideoFrame(video, 350);
+
+  try { video.pause(); } catch (error) {}
+}
+
 class Source {
 
     constructor(file, id) {
@@ -88,8 +155,10 @@ class Source {
         src: this.url,
         muted: true,
         playsInline: true,
-        preload: 'auto'
+        preload: 'auto',
+        crossOrigin: 'anonymous'
       });
+      this.thumbnailVideo.setAttribute('webkit-playsinline', 'true');
       this.thumbnailVideo.addEventListener('loadedmetadata', () => this.onVideoMetadata());
       this.thumbnailVideo.addEventListener('error', () => this.failSafeReady(), { once: true });
     }
@@ -105,7 +174,7 @@ class Source {
       this.requestThumbnailFrame();
     }
 
-    requestThumbnailFrame() {
+    async requestThumbnailFrame() {
       if (!this.thumbnailVideo || this._thumbnailCaptured || this._thumbnailRequested) return;
       this._thumbnailRequested = true;
 
@@ -114,9 +183,12 @@ class Source {
         ? Math.min(Math.max(duration * 0.25, 0.15), Math.max(duration - 0.1, 0))
         : 0;
 
-      const captureOnce = () => this.captureThumbnailFrame();
-      const fallbackTimer = setTimeout(() => {
+      const captureOnce = async () => {
+        await waitForDecodedVideoFrame(this.thumbnailVideo, 500);
         this.captureThumbnailFrame();
+      };
+      const fallbackTimer = setTimeout(() => {
+        captureOnce();
       }, 1200);
 
       const cleanup = () => {
@@ -126,22 +198,22 @@ class Source {
         this.thumbnailVideo?.removeEventListener('canplay', onCanPlay);
       };
 
-      const onSeeked = () => {
+      const onSeeked = async () => {
         cleanup();
-        captureOnce();
+        await captureOnce();
       };
 
-      const onLoadedData = () => {
+      const onLoadedData = async () => {
         if (targetTime <= 0.001) {
           cleanup();
-          captureOnce();
+          await captureOnce();
         }
       };
 
-      const onCanPlay = () => {
+      const onCanPlay = async () => {
         if (targetTime <= 0.001) {
           cleanup();
-          captureOnce();
+          await captureOnce();
         }
       };
 
@@ -154,11 +226,11 @@ class Source {
           this.thumbnailVideo.currentTime = targetTime;
         } else if (this.thumbnailVideo.readyState >= 2) {
           cleanup();
-          captureOnce();
+          await captureOnce();
         }
       } catch (error) {
         cleanup();
-        this.captureThumbnailFrame();
+        await captureOnce();
       }
     }
 
@@ -174,9 +246,25 @@ class Source {
       try {
         thumbnailContext.clearRect(0, 0, videoWidth, videoHeight);
         thumbnailContext.drawImage(this.thumbnailVideo, 0, 0, videoWidth, videoHeight);
+        const pixel = thumbnailContext.getImageData(
+          Math.max(0, Math.floor(videoWidth / 2) - 1),
+          Math.max(0, Math.floor(videoHeight / 2) - 1),
+          1,
+          1
+        ).data;
+        const looksBlack = pixel[0] < 4 && pixel[1] < 4 && pixel[2] < 4 && pixel[3] > 0;
+
+        if (looksBlack && !this._thumbnailWarmupTried) {
+          this._thumbnailWarmupTried = true;
+          warmupVideoForCanvas(this.thumbnailVideo).then(() => {
+            if (!this._thumbnailCaptured) this.captureThumbnailFrame();
+          });
+          return;
+        }
+
         this.thumbnail = thumbnailCanvas.toDataURL('image/jpeg', 0.82);
       } catch (error) {
-        this.thumbnail = this.thumbnail || this.url;
+        this.thumbnail = this.thumbnail || '';
       }
 
       this._thumbnailCaptured = true;
@@ -186,7 +274,7 @@ class Source {
     failSafeReady() {
       if (this._thumbnailCaptured) return;
       this.length = this.length || 5;
-      this.thumbnail = this.thumbnail || this.url;
+      this.thumbnail = this.thumbnail || '';
       this._thumbnailCaptured = true;
       this.amReady();
     }

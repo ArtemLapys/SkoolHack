@@ -3,6 +3,69 @@ const MIN_LENGTH = 0.1; // s
 const DRAG_MIN_DIST = 5; // px
 const SELECT_PADDING = 12; // px
 
+function waitForTrackVideoFrame(video, timeout = 1000) {
+  return new Promise(resolve => {
+    if (!video) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+    let timeoutId = null;
+    let rvfcId = null;
+
+    const cleanup = () => {
+      if (settled) return;
+      settled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      video.removeEventListener('loadeddata', onReady);
+      video.removeEventListener('canplay', onReady);
+      video.removeEventListener('seeked', onReady);
+      if (rvfcId !== null && typeof video.cancelVideoFrameCallback === 'function') {
+        try { video.cancelVideoFrameCallback(rvfcId); } catch (error) {}
+      }
+      resolve();
+    };
+
+    const onReady = () => {
+      if (typeof video.requestVideoFrameCallback === 'function') {
+        try {
+          rvfcId = video.requestVideoFrameCallback(() => cleanup());
+          return;
+        } catch (error) {}
+      }
+
+      requestAnimationFrame(() => cleanup());
+    };
+
+    timeoutId = setTimeout(cleanup, timeout);
+
+    if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+      onReady();
+      return;
+    }
+
+    video.addEventListener('loadeddata', onReady, { once: true });
+    video.addEventListener('canplay', onReady, { once: true });
+    video.addEventListener('seeked', onReady, { once: true });
+  });
+}
+
+async function warmupTrackVideo(video) {
+  if (!video) return;
+
+  try {
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      await playPromise.catch(() => {});
+    }
+  } catch (error) {}
+
+  await waitForTrackVideoFrame(video, 350);
+
+  try { video.pause(); } catch (error) {}
+}
+
 class Track {
 
     constructor(source, props) {
@@ -829,7 +892,13 @@ class Track {
         const targetTime = mod(rel + trimStart, safeSourceLength);
         const safeTargetTime = Number.isFinite(targetTime) ? targetTime : 0;
 
-        const finalize = () => res();
+        let finalized = false;
+        const finalize = async () => {
+          if (finalized) return;
+          finalized = true;
+          await waitForTrackVideoFrame(this.media, 250);
+          res();
+        };
 
         if (!this.media || typeof this.media.currentTime !== 'number') {
           finalize();
@@ -838,6 +907,7 @@ class Track {
 
         this.media.addEventListener('timeupdate', finalize, {once: true});
         this.media.addEventListener('seeked', finalize, {once: true});
+        this.media.addEventListener('loadeddata', finalize, {once: true});
 
         try {
           this.media.currentTime = safeTargetTime;
@@ -880,12 +950,16 @@ class Track {
       this.mediaLoaded = new Promise(res => videoLoaded = res);
       this.media = Elem('video', {
         src: this.source.url,
+        muted: true,
+        playsInline: true,
+        preload: 'auto',
         loop: true,
         onloadeddata: e => {
           if (this.media.readyState < 2) return;
           videoLoaded();
         }
       });
+      this.media.setAttribute('webkit-playsinline', 'true');
     }
   
     showChange(prop, value, isFinal) {
@@ -902,6 +976,7 @@ class Track {
   
     render(ctx, time, play = false) {
       super.render(ctx, time, play);
+      if (!this.media || this.media.readyState < 2 || !this.media.videoWidth || !this.media.videoHeight) return;
       ctx.save();
       ctx.translate(ctx.canvas.width * (this.xPos + 1) / 2, ctx.canvas.height * (1 - this.yPos) / 2);
       ctx.rotate(this.rotation * Math.PI / 180);
@@ -929,7 +1004,17 @@ class Track {
           }
         }
       }
-      ctx.drawImage(this.media, -width / 2, -height / 2, width, height);
+      try {
+        ctx.drawImage(this.media, -width / 2, -height / 2, width, height);
+      } catch (error) {
+        if (!this._trackWarmupTried) {
+          this._trackWarmupTried = true;
+          warmupTrackVideo(this.media).then(() => {
+            this._trackWarmupTried = false;
+            if (typeof rerender === 'function') rerender();
+          });
+        }
+      }
       ctx.restore();
     }
   
