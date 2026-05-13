@@ -107,7 +107,7 @@ This makes export faster and more stable for simple timelines, while still suppo
 
 ## Running the Project
 
-Because FFmpeg WebAssembly requires cross-origin isolation, the project should be opened through `localhost` or `https`, not просто как локальный `file://`.
+Because FFmpeg WebAssembly requires cross-origin isolation, the project should be opened through `localhost` or `https`, not just as a local `file://`.
 
 Important requirement:
 
